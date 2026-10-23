@@ -5,3 +5,5 @@ package-lock.json
 fixtures
 playwright-report
 test-results
+docs/SUPPORT_MATRIX.md
+docs/RULE_CATALOG.md

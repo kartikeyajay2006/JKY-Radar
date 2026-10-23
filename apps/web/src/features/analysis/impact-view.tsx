@@ -19,13 +19,15 @@ const STROKE: Record<FindingSeverity, string> = {
 
 /** Consumers (left) → changed entities (right). Only registered dependencies and matched findings are drawn. */
 function DependencyGraph({ impact }: { impact: ImpactDTO }) {
-  const { nodesL, nodesR, edges } = useMemo(() => {
+  const { nodesL, nodesR, edges, labels } = useMemo(() => {
     const consumers = impact.consumers.filter((c) => c.known.length || c.potential.some((p) => p.entityKey));
     const entities = new Map<string, FindingSeverity>();
+    const labels = new Map<string, string>();
     const e: Array<{ c: string; ent: string; sev: FindingSeverity; known: boolean }> = [];
     for (const c of consumers) {
       for (const k of c.known) {
         e.push({ c: c.consumerId, ent: k.entityKey, sev: k.severity, known: true });
+        if (!labels.has(k.entityKey)) labels.set(k.entityKey, k.dependency);
         const cur = entities.get(k.entityKey);
         if (!cur || SEVERITY_RANK[k.severity] < SEVERITY_RANK[cur]) entities.set(k.entityKey, k.severity);
       }
@@ -42,6 +44,7 @@ function DependencyGraph({ impact }: { impact: ImpactDTO }) {
       if (!prev || SEVERITY_RANK[x.sev] < SEVERITY_RANK[prev.sev]) uniq.set(k, x);
     }
     return {
+      labels,
       nodesL: consumers,
       nodesR: [...entities.entries()].sort((a, b) => SEVERITY_RANK[a[1]] - SEVERITY_RANK[b[1]]).slice(0, 14),
       edges: [...uniq.values()],
@@ -56,7 +59,7 @@ function DependencyGraph({ impact }: { impact: ImpactDTO }) {
     <figure className="panel overflow-x-auto p-4">
       <svg
         viewBox={`0 0 760 ${h}`}
-        className="min-w-[640px]"
+        className="mx-auto block w-full max-w-[820px] min-w-[640px]"
         role="img"
         aria-label="Dependency graph between registered consumers and changed operations"
       >
@@ -100,7 +103,10 @@ function DependencyGraph({ impact }: { impact: ImpactDTO }) {
               strokeOpacity="0.6"
             />
             <text x="10" y="18" fontSize="11.5" fill="var(--fg-soft)" fontFamily="var(--font-mono)">
-              {k.length > 38 ? `${k.slice(0, 37)}…` : k}
+              {(() => {
+                const label = (labels.get(k) ?? k).replace(/\{\}/g, '{…}');
+                return label.length > 38 ? `${label.slice(0, 37)}…` : label;
+              })()}
             </text>
           </g>
         ))}

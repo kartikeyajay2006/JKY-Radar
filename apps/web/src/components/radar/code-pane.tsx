@@ -100,12 +100,16 @@ export default function CodePane({
     [lang, highlights, ariaLabel, editable],
   );
 
-  useEffect(() => {
-    const view = ref.current?.view;
+  const scroll = (view: EditorView | undefined) => {
     if (!view || !scrollTo || scrollTo < 1 || scrollTo > view.state.doc.lines) return;
     const pos = view.state.doc.line(scrollTo).from;
     view.dispatch({ effects: EditorView.scrollIntoView(pos, { y: 'center' }) });
-  }, [scrollTo, value]);
+  };
+  useEffect(() => {
+    // The view is created asynchronously; retry on the next frame when it is not ready yet.
+    if (ref.current?.view) scroll(ref.current.view);
+    else requestAnimationFrame(() => scroll(ref.current?.view));
+  }, [scrollTo, value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <CodeMirror
@@ -116,6 +120,7 @@ export default function CodePane({
       editable={editable}
       readOnly={!editable}
       onChange={onChange}
+      onCreateEditor={(view) => requestAnimationFrame(() => scroll(view))}
       extensions={extensions}
       basicSetup={{
         foldGutter: false,
