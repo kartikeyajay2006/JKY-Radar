@@ -300,6 +300,8 @@ export function workspacesRouter() {
       const self = m.userId.equals(access.userId);
       if (m.role === 'OWNER') throw forbidden('The owner cannot be removed.');
       if (!self && !['OWNER', 'ADMIN'].includes(access.role)) throw forbidden();
+      if (!self && access.role === 'ADMIN' && m.role === 'ADMIN')
+        throw forbidden('Only the owner can remove another admin.');
       await m.deleteOne();
       await audit(req, {
         workspaceId: access.workspaceId,

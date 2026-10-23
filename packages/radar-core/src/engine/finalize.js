@@ -9,7 +9,7 @@ import { RULE_REGISTRY_VERSION } from '../rules/registry.js';
 /** @import { FindingEmitter } from '../rules/emitter.js' */
 
 /** Bump on any change that can alter analysis output. */
-export const ENGINE_VERSION = '1.0.0';
+export const ENGINE_VERSION = '1.0.1';
 
 /**
  * @param {ParsedContract} c

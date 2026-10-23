@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { redactSecrets } from '../src/index.js';
+import { parseStructured, redactSecrets } from '../src/index.js';
 
 describe('secret redaction', () => {
   it('redacts secret-named keys in YAML and keeps formatting', () => {
     const src = 'auth:\n  password: hunter2hunter2\n  user: alice\n';
     const r = redactSecrets(src);
-    expect(r.content).toBe('auth:\n  password: [REDACTED]\n  user: alice\n');
+    expect(r.content).toBe('auth:\n  password: "[REDACTED]"\n  user: alice\n');
     expect(r.redactions).toEqual([{ line: 2, reason: 'secret-named key "password"' }]);
   });
   it('does not touch schema definitions named like secrets', () => {
@@ -15,5 +15,28 @@ describe('secret redaction', () => {
   it('redacts credential patterns in non-structured text', () => {
     const r = redactSecrets('# token: ghp_abcdefghijklmnopqrstuvwxyz0123\ntype Query { a: Int }');
     expect(r.content).not.toContain('ghp_');
+  });
+});
+
+describe('YAML redaction with document prefixes', () => {
+  it.each([
+    '# API contract\n',
+    '---\n',
+    '%YAML 1.2\n---\n',
+    '\uFEFF# API contract\n',
+    '# API contract\n---\n',
+  ])('redacts keys after prefix %j without changing scalar types', (prefix) => {
+    const source = `${prefix}auth:\n  password: example-secret-123\n  token: example-token-456\n  user: alice\n`;
+    const result = redactSecrets(source);
+    expect(result.content).not.toContain('example-secret-123');
+    expect(result.content).not.toContain('example-token-456');
+    expect(parseStructured(result.content).value).toEqual({
+      auth: { password: '[REDACTED]', token: '[REDACTED]', user: 'alice' },
+    });
+    expect(result.content.startsWith(prefix)).toBe(true);
+    expect(result.redactions.map((r) => r.line)).toEqual([
+      prefix.split('\n').length + 1,
+      prefix.split('\n').length + 2,
+    ]);
   });
 });

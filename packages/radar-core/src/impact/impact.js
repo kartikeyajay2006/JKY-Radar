@@ -133,6 +133,7 @@ export function computeImpact(findings, consumers) {
           matchedFingerprints.add(f.fingerprint);
         }
       } else if (deps.length > 0) {
+        matchedFingerprints.add(f.fingerprint);
         ic.potential.push({
           fingerprint: f.fingerprint,
           ruleId: f.ruleId,

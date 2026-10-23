@@ -6,7 +6,7 @@ import { nearestLocator } from './parse/structured.js';
 /** @import { NormalizeContext, SchemaDialect } from '@jky/radar-core' */
 /** @import { StructuredDocument } from './parse/structured.js' */
 
-export const ADAPTER_VERSION = '1.0.0';
+export const ADAPTER_VERSION = '1.0.1';
 
 export class ContractValidationError extends Error {
   /** @param {Diagnostic[]} diagnostics */

@@ -3,6 +3,14 @@
 /** @import { EmitInput, FindingEmitter } from '../rules/emitter.js' */
 
 import { canonicalJson, preview } from '../util/canonical.js';
+import { createNormalizeContext, normalizeSchema } from './normalize.js';
+
+// A stable node lets the normal comparator handle open-to-schema transitions.
+const ANY_SCHEMA = normalizeSchema(
+  true,
+  '',
+  createNormalizeContext(true, 'draft2020', () => undefined),
+);
 
 /**
  *  A change relative to the schema being compared; re-based onto each usage site.
@@ -576,7 +584,9 @@ export class SchemaComparator {
    */
   compareProperties(o, n, pol, depth, out) {
     const req = pol === 'request';
-    const names = [...new Set([...Object.keys(o.properties), ...Object.keys(n.properties)])].sort();
+    const names = [
+      ...new Set([...Object.keys(o.properties), ...Object.keys(n.properties), ...o.required, ...n.required]),
+    ].sort();
     if (names.length === 0) return this.compareAdditional(o, n, pol, depth, out);
     /**
      * @param {NSchema} s
@@ -641,6 +651,27 @@ export class SchemaComparator {
         }
         continue;
       }
+      if (!op && !np) {
+        const wasRequired = effRequired(o, name);
+        const nowRequired = effRequired(n, name);
+        if (wasRequired !== nowRequired) {
+          out.push({
+            rel,
+            ruleId: req
+              ? nowRequired
+                ? 'REQ_PROPERTY_BECAME_REQUIRED'
+                : 'REQ_PROPERTY_BECAME_OPTIONAL'
+              : nowRequired
+                ? 'RES_PROPERTY_BECAME_REQUIRED'
+                : 'RES_PROPERTY_BECAME_OPTIONAL',
+            message: `${req ? 'Request' : 'Response'} property "${name}" became ${nowRequired ? 'required' : 'optional'}.`,
+            before: wasRequired ? 'required' : 'optional',
+            after: nowRequired ? 'required' : 'optional',
+            ...s,
+          });
+        }
+        continue;
+      }
       if (!op || !np) continue;
       const or = effRequired(o, name);
       const nr = effRequired(n, name);
@@ -682,18 +713,31 @@ export class SchemaComparator {
   compareAdditional(o, n, pol, depth, out) {
     const a = o.additionalProperties;
     const b = n.additionalProperties;
-    if (pol === 'request' && a !== false && b === false) {
+    if (a === false || b === false) {
+      if (a === b) return;
+      const tightened = b === false;
       out.push({
         rel: '',
-        ruleId: 'REQ_ADDITIONAL_PROPERTIES_RESTRICTED',
-        message: 'Request object no longer accepts additional (undocumented) properties.',
-        before: a === undefined ? 'allowed' : a === true ? true : 'schema',
-        after: false,
+        ruleId:
+          pol === 'request'
+            ? tightened
+              ? 'REQ_ADDITIONAL_PROPERTIES_RESTRICTED'
+              : 'REQ_CONSTRAINT_RELAXED'
+            : tightened
+              ? 'RES_CONSTRAINT_TIGHTENED'
+              : 'RES_CONSTRAINT_RELAXED',
+        message: `Additional properties are now ${tightened ? 'forbidden' : 'allowed'}.`,
+        before: a === undefined ? true : typeof a === 'object' ? 'schema' : a,
+        after: b === undefined ? true : typeof b === 'object' ? 'schema' : b,
         ...src(o, n),
       });
-    } else if (typeof a === 'object' && typeof b === 'object') {
-      for (const c of this.compare(a, b, pol, depth + 1)) out.push({ ...c, rel: `.*${c.rel}` });
+      return;
     }
+    const oldSchema = typeof a === 'object' ? a : ANY_SCHEMA;
+    const newSchema = typeof b === 'object' ? b : ANY_SCHEMA;
+    if (oldSchema === newSchema) return;
+    for (const c of this.compare(oldSchema, newSchema, pol, depth + 1))
+      out.push({ ...src(o, n), ...c, rel: `.*${c.rel}` });
   }
 }
 

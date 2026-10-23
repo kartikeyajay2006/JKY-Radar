@@ -57,15 +57,12 @@ function isPlaceholder(value) {
  * @returns {RedactionResult}
  */
 export function redactSecrets(content) {
-  const trimmed = content.trimStart();
-  const structured =
-    trimmed.startsWith('{') || trimmed.startsWith('[') || /^[\w"'-]+\s*:/m.test(trimmed.split('\n')[0] ?? '');
   /** @param {number} offset */
   const lineOf = (offset) => content.slice(0, offset).split('\n').length;
   /** @type {Array<{ start: number; end: number; text: string; reason: string }>} */
   const replacements = [];
 
-  if (structured) {
+  {
     let doc;
     try {
       doc = parseDocument(content, { schema: 'core', uniqueKeys: false, strict: false, merge: false });
@@ -84,7 +81,7 @@ export function redactSecrets(content) {
         if (isPlaceholder(node.value)) return;
         const [start, end] = node.range;
         const raw = content.slice(start, end);
-        const q = raw.startsWith('"') || raw.startsWith("'") ? quoteFor(raw) : '';
+        const q = quoteFor(raw);
         replacements.push({ start, end, text: `${q}${REDACTED}${q}`, reason });
       };
       /**

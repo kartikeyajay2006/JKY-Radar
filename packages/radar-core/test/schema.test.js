@@ -112,3 +112,66 @@ describe('references', () => {
     expect(s.required).toEqual(['a']);
   });
 });
+
+describe('additional properties compatibility', () => {
+  it.each([
+    [true, { type: 'string' }, 'request', 'REQ_TYPE_NARROWED'],
+    [undefined, { type: 'string' }, 'request', 'REQ_TYPE_NARROWED'],
+    [{ type: 'string' }, true, 'response', 'RES_TYPE_CHANGED'],
+    [false, true, 'response', 'RES_CONSTRAINT_RELAXED'],
+    [false, undefined, 'response', 'RES_CONSTRAINT_RELAXED'],
+    [false, { type: 'string' }, 'response', 'RES_CONSTRAINT_RELAXED'],
+    [true, false, 'response', 'RES_CONSTRAINT_TIGHTENED'],
+    [{ type: 'string' }, true, 'request', 'REQ_TYPE_WIDENED'],
+    [false, true, 'request', 'REQ_CONSTRAINT_RELAXED'],
+  ])('compares %j → %j with %s polarity', (before, after, polarity, rule) => {
+    expect(
+      diff(
+        { type: 'object', additionalProperties: before },
+        { type: 'object', additionalProperties: after },
+        /** @type {'request' | 'response'} */ (polarity),
+      ),
+    ).toContain(rule);
+  });
+  it('treats omitted, true and empty schemas as equivalent', () => {
+    for (const polarity of /** @type {const} */ (['request', 'response'])) {
+      for (const before of [undefined, true, {}]) {
+        for (const after of [undefined, true, {}]) {
+          expect(diff({ additionalProperties: before }, { additionalProperties: after }, polarity)).toEqual(
+            [],
+          );
+        }
+      }
+      expect(diff({ additionalProperties: false }, { additionalProperties: false }, polarity)).toEqual([]);
+    }
+  });
+  it('compares constraints inside additional property schemas', () => {
+    expect(
+      diff(
+        { additionalProperties: { type: 'string', minLength: 1 } },
+        { additionalProperties: { type: 'string', minLength: 3 } },
+        'request',
+      ),
+    ).toEqual(['REQ_CONSTRAINT_TIGHTENED']);
+  });
+});
+
+describe('required properties without definitions', () => {
+  it.each([
+    ['request', [], ['token'], 'REQ_PROPERTY_BECAME_REQUIRED'],
+    ['request', ['token'], [], 'REQ_PROPERTY_BECAME_OPTIONAL'],
+    ['response', ['token'], [], 'RES_PROPERTY_BECAME_OPTIONAL'],
+    ['response', [], ['token'], 'RES_PROPERTY_BECAME_REQUIRED'],
+  ])('compares requiredness with %s polarity', (polarity, before, after, rule) => {
+    expect(
+      diff(
+        { type: 'object', required: before },
+        { type: 'object', required: after },
+        /** @type {'request' | 'response'} */ (polarity),
+      ),
+    ).toEqual([rule]);
+  });
+  it('does not report unchanged required fields', () => {
+    expect(diff({ required: ['token'] }, { required: ['token'] }, 'request')).toEqual([]);
+  });
+});

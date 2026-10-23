@@ -123,3 +123,28 @@ describe('operation aliases', () => {
     expect(ids).toContain('HTTP_DOCS_CHANGED');
   });
 });
+
+describe('schema release gate regressions', () => {
+  it.each([
+    [{ additionalProperties: true }, { additionalProperties: { type: 'string' } }, 'request', 'block'],
+    [{ additionalProperties: false }, { additionalProperties: true }, 'response', 'warn'],
+    [{ required: [] }, { required: ['token'] }, 'request', 'block'],
+  ])('gates %j → %j with %s polarity as %s', (before, after, polarity, expectedGate) => {
+    const input = (schema) => ({
+      content: JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        ...schema,
+      }),
+    });
+    const outcome = analyzeContracts({
+      baseline: input(before),
+      candidate: input(after),
+      options: { jsonSchemaPolarity: /** @type {'request' | 'response'} */ (polarity) },
+    });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    expect(outcome.result.gate.decision).toBe(expectedGate);
+    expect(outcome.result.findings.length).toBeGreaterThan(0);
+  });
+});

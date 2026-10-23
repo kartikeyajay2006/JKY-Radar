@@ -53,6 +53,16 @@ describe('consumer impact', () => {
     expect(r.consumers.find((c) => c.consumerId === 'c2').potential).toHaveLength(1);
     expect(r.knownImpactedCount).toBe(1);
     expect(r.unmatchedRiskyFindings.map((x) => x.entityKey)).toContain('GET /legacy');
+    expect(r.unmatchedRiskyFindings).toHaveLength(1);
     expect(r.disclaimer).toMatch(/not harmless/);
   });
+});
+
+it('keeps contract-wide findings unmatched when nobody has a dependency', () => {
+  const result = computeImpact(
+    [f('HTTP_SERVER_REMOVED', 'needs_review')],
+    [{ id: 'unwired', name: 'Unwired', criticality: 'low', dependencies: [] }],
+  );
+  expect(result.unmatchedRiskyFindings).toHaveLength(1);
+  expect(result.consumers[0].potential).toHaveLength(0);
 });

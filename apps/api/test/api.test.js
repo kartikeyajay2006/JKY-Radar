@@ -191,6 +191,25 @@ describe('projects and immutable versions', () => {
     });
     expect(big.status).toBe(413);
   });
+  it.each(['# API contract\n', '---\n'])(
+    'redacts secrets before storing YAML prefixed with %j',
+    async (prefix) => {
+      const project = await owner.post(`/api/v1/workspaces/${wid}/projects`, {
+        name: `Redaction ${prefix.trim()}`,
+        protocol: 'openapi',
+      });
+      const result = await owner.post(`/api/v1/projects/${project.body.data.id}/versions`, {
+        label: 'v1',
+        content: `${prefix}openapi: 3.0.3\ninfo: { title: Example, version: 1.0.0 }\npaths: {}\nx-example:\n  password: example-secret-123\n`,
+      });
+      expect(result.status).toBe(201);
+      expect(result.body.data.redactions).toHaveLength(1);
+      const stored = await owner.get(`/api/v1/versions/${result.body.data.id}/content`);
+      expect(stored.status).toBe(200);
+      expect(stored.body.data.content).not.toContain('example-secret-123');
+      expect(stored.body.data.content).toContain('[REDACTED]');
+    },
+  );
   it('stored versions are immutable', async () => {
     await expect(SpecVersion.updateOne({ _id: v1 }, { $set: { label: 'hacked' } })).rejects.toThrow(
       /immutable/,
@@ -432,6 +451,34 @@ describe('roles, reviews and tenant isolation', () => {
     expect(
       (await viewer.patch(`/api/v1/workspaces/${wid}/members/${viewerMember.id}`, { role: 'ADMIN' })).status,
     ).toBe(403);
+  });
+  it('only owners can remove another admin, while admins can leave themselves', async () => {
+    const first = await new Client(ctx.app).register('first-admin@example.com', 'First Admin');
+    const second = await new Client(ctx.app).register('second-admin@example.com', 'Second Admin');
+    for (const client of [first, second]) {
+      expect(
+        (
+          await owner.post(`/api/v1/workspaces/${wid}/invitations`, {
+            email: client.user.email,
+            role: 'ADMIN',
+          })
+        ).status,
+      ).toBe(201);
+      const invites = await client.get('/api/v1/invitations');
+      expect((await client.post(`/api/v1/invitations/${invites.body.data[0].id}/accept`)).status).toBe(200);
+    }
+    const members = (await owner.get(`/api/v1/workspaces/${wid}/members`)).body.data;
+    const firstMember = members.find((m) => m.userId === first.user.id);
+    const secondMember = members.find((m) => m.userId === second.user.id);
+    const ownerMember = members.find((m) => m.userId === owner.user.id);
+    const url = (id) => `/api/v1/workspaces/${wid}/members/${id}`;
+    expect((await first.del(url(secondMember.id))).status).toBe(403);
+    expect((await first.del(url(ownerMember.id))).status).toBe(403);
+    expect((await viewer.del(url(secondMember.id))).status).toBe(403);
+    expect((await second.get(`/api/v1/workspaces/${wid}`)).status).toBe(200);
+    expect((await owner.del(url(secondMember.id))).status).toBe(204);
+    expect((await second.get(`/api/v1/workspaces/${wid}`)).status).toBe(404);
+    expect((await first.del(url(firstMember.id))).status).toBe(204);
   });
   it('maintainers cannot change the release policy', async () => {
     const members = await owner.get(`/api/v1/workspaces/${wid}/members`);
