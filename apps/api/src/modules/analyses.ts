@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import type { Types } from 'mongoose';
 import { createReviewSchema, findingsQuery, reportQuery, type ReviewDTO } from '@jky/shared';
-import { Analysis, FindingModel, Review, SpecFile, SpecVersion } from '../models/index.js';
+import { Analysis, FindingModel, Project, Review, SpecFile, SpecVersion } from '../models/index.js';
 import { asyncHandler, escapeRegex, parse, sendData } from '../lib/http.js';
 import { AppError, conflict, forbidden, notFound } from '../lib/errors.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -33,8 +33,8 @@ export async function sendAnalysis(res: Response, a: AnalysisLike & Record<strin
     SpecVersion.findById(a.candidateId).lean(),
   ]);
   if (!bv || !cv) throw notFound('Analysis inputs');
-  const names = await userNames([a.createdBy]);
-  sendData(res, analysisDTO(a, bv, cv, names));
+  const [names, project] = await Promise.all([userNames([a.createdBy]), Project.findById(a.projectId).select('name').lean()]);
+  sendData(res, { ...analysisDTO(a, bv, cv, names), ...(project ? { projectName: project.name } : {}) });
 }
 
 export async function sendFindings(req: Request, res: Response, analysisId: Types.ObjectId) {

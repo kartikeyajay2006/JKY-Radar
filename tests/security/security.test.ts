@@ -97,6 +97,15 @@ describe('security: worker isolation, rate limits, XSS, IDOR on writes', () => {
     expect(limited).toBe(true);
   });
 
+  it('private API responses are never cacheable; only the public demo is', async () => {
+    const priv = await a.get(`/api/v1/analyses/${analysisId}`);
+    expect(priv.headers['cache-control']).toBe('no-store');
+    const me = await a.get('/api/v1/auth/session');
+    expect(me.headers['cache-control']).toBe('no-store');
+    const demo = await request(ctx.app).get('/api/v1/demo/analyses');
+    expect(demo.headers['cache-control']).toMatch(/public/);
+  });
+
   it('unknown API routes return a JSON 404 envelope', async () => {
     const r = await request(ctx.app).get('/api/v1/nope');
     expect(r.status).toBe(404);

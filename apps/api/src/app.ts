@@ -92,6 +92,10 @@ export function createApp({ env, runner = new AnalysisRunner(env) }: AppDeps) {
   app.use(accessLog);
 
   const api = express.Router();
+  api.use((_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
   api.use(loadSession(env));
   api.use(csrfProtection(env, origins));
   api.use(limiter(env, 60_000, 600));

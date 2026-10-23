@@ -17,7 +17,8 @@ async function demoAnalysis(id: string) {
 
 export function demoRouter() {
   const r = Router();
-  r.use((_req, res, next) => {
+  // Only the public demo is cacheable; everything else stays no-store.
+  r.use('/demo', (_req, res, next) => {
     res.setHeader('Cache-Control', 'public, max-age=60');
     next();
   });

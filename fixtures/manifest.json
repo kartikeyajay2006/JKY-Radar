@@ -1,7 +1,7 @@
 [
   {
     "id": "openapi-ecommerce",
-    "name": "ShopWave Commerce API v1.4 \u2192 v2.0",
+    "name": "ShopWave Commerce API",
     "protocol": "openapi",
     "baseline": "openapi/breaking/ecommerce-v1.yaml",
     "candidate": "openapi/breaking/ecommerce-v2.yaml",
@@ -24,11 +24,13 @@
         "REQ_PROPERTY_REMOVED",
         "SCHEMA_COMBINATOR_CHANGED"
       ]
-    }
+    },
+    "baselineLabel": "v1.4.0",
+    "candidateLabel": "v2.0.0"
   },
   {
     "id": "openapi-uncertain",
-    "name": "PetCatalog OAS 3.0 \u2192 3.1 (nullability, oneOf, circular refs)",
+    "name": "PetCatalog API (OAS 3.0 to 3.1)",
     "protocol": "openapi",
     "baseline": "openapi/uncertain/catalog-v1.yaml",
     "candidate": "openapi/uncertain/catalog-v2.yaml",
@@ -45,7 +47,9 @@
         "RES_TYPE_CHANGED",
         "SCHEMA_DEPTH_LIMIT"
       ]
-    }
+    },
+    "baselineLabel": "v1.0.0 (OAS 3.0)",
+    "candidateLabel": "v1.1.0 (OAS 3.1)"
   },
   {
     "id": "openapi-safe",
@@ -92,7 +96,9 @@
         "GQL_UPSTREAM_UNMATCHED",
         "GQL_TYPE_REMOVED"
       ]
-    }
+    },
+    "baselineLabel": "2024-09 schema",
+    "candidateLabel": "2024-11 schema"
   },
   {
     "id": "postman-payments",
@@ -112,7 +118,9 @@
       "exclude": [
         "HTTP_OPERATION_REMOVED"
       ]
-    }
+    },
+    "baselineLabel": "collection v1",
+    "candidateLabel": "collection v2"
   },
   {
     "id": "swagger2-cross",
@@ -208,7 +216,9 @@
       "exclude": [
         "PROTO_PACKAGE_CHANGED"
       ]
-    }
+    },
+    "baselineLabel": "orders.proto r12",
+    "candidateLabel": "orders.proto r13"
   },
   {
     "id": "asyncapi-orders",

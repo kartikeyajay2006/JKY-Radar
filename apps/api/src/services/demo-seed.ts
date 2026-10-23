@@ -41,6 +41,8 @@ interface ManifestEntry {
   candidate: string;
   options?: AnalysisOptions;
   demo?: boolean;
+  baselineLabel?: string;
+  candidateLabel?: string;
 }
 
 /** Synthetic consumers for the public demo. These are illustrative registrations, not discovered usage. */
@@ -245,13 +247,13 @@ export async function seedDemo(
     const bv = await createVersion(
       project,
       bot._id,
-      { label: labelOf(m.baseline), content: read(m.baseline), fileName: path.basename(m.baseline) },
+      { label: m.baselineLabel ?? labelOf(m.baseline), content: read(m.baseline), fileName: path.basename(m.baseline) },
       maxBytes,
     );
     const cv = await createVersion(
       project,
       bot._id,
-      { label: labelOf(m.candidate), content: read(m.candidate), fileName: path.basename(m.candidate) },
+      { label: m.candidateLabel ?? labelOf(m.candidate), content: read(m.candidate), fileName: path.basename(m.candidate) },
       maxBytes,
     );
     const options = { includeInformational: true, ...(m.options ?? {}) };
