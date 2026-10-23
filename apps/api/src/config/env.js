@@ -1,4 +1,19 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+
+/**
+ * Loads the repository-root .env file when it exists. Variables already present in the
+ * environment win, so CI and hosting platforms can override anything.
+ * @returns {string | null} the loaded file path, or null when there is no .env
+ */
+export function loadDotEnv() {
+  const file = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../.env');
+  if (!existsSync(file)) return null;
+  process.loadEnvFile(file);
+  return file;
+}
 
 const bool = z.enum(['true', 'false']).transform((v) => v === 'true');
 

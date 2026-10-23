@@ -5,9 +5,9 @@
   "description": "JKY-Radar REST API (Express + MongoDB).",
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file-if-exists=../../.env src/server.js",
-    "start": "node --env-file-if-exists=../../.env src/server.js",
-    "seed:demo": "node --env-file-if-exists=../../.env src/scripts/seed-demo.js",
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "seed:demo": "node src/scripts/seed-demo.js",
     "typecheck": "tsc -p jsconfig.json"
   },
   "dependencies": {

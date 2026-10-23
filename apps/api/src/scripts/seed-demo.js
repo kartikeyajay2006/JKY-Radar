@@ -1,9 +1,10 @@
-import { loadEnv } from '../config/env.js';
+import { loadDotEnv, loadEnv } from '../config/env.js';
 import { connectDb, disconnectDb } from '../db.js';
 import { ensureIndexes } from '../models/index.js';
 import { AnalysisRunner } from '../services/analysis-runner.js';
 import { seedDemo } from '../services/demo-seed.js';
 
+loadDotEnv();
 const env = loadEnv({ ...process.env, ANALYSIS_ISOLATION: process.env.ANALYSIS_ISOLATION ?? 'inline' });
 await connectDb(env.MONGODB_URI);
 await ensureIndexes();

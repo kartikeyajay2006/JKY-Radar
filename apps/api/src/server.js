@@ -1,4 +1,4 @@
-import { loadEnv } from './config/env.js';
+import { loadDotEnv, loadEnv } from './config/env.js';
 import { connectDb, disconnectDb } from './db.js';
 import { createApp } from './app.js';
 import { ensureIndexes } from './models/index.js';
@@ -7,6 +7,7 @@ import { seedDemo } from './services/demo-seed.js';
 import { logger } from './lib/logger.js';
 
 async function main() {
+  loadDotEnv();
   const env = loadEnv();
   await connectDb(env.MONGODB_URI);
   await ensureIndexes();
