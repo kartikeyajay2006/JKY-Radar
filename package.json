@@ -1,0 +1,50 @@
+{
+  "name": "jky-radar",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JKY-Radar — vendor-neutral API contract compatibility intelligence. One Radar. Every API. Know What Breaks Before You Ship.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "packages/shared",
+    "packages/radar-core",
+    "packages/radar-adapters",
+    "packages/radar-cli",
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w @jky/api\" \"npm run dev -w @jky/web\"",
+    "build": "npm run build -w @jky/web && npm run build -w @jky/api",
+    "start": "npm run start -w @jky/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:unit": "vitest run --project packages",
+    "test:api": "vitest run --project api",
+    "test:e2e": "playwright test",
+    "seed:demo": "npm run seed:demo -w @jky/api",
+    "radar": "tsx packages/radar-cli/src/cli.ts",
+    "docs:matrix": "tsx scripts/generate-support-matrix.ts",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "1.64.1",
+    "@types/node": "^22.15.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.39.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.40.0",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,49 @@
+"""Synthetic bookstore schema used by the JKY-Radar demo."""
+type Query {
+  books(first: Int = 20, after: String, language: String!): BookConnection!
+  book(id: ID!): Book
+  authors: [Author!]!
+}
+
+type Mutation {
+  addReview(input: ReviewInput!): Review!
+}
+
+type BookConnection {
+  edges: [Book!]!
+  totalCount: Int!
+}
+
+type Book {
+  id: ID!
+  title: String!
+  format: BookFormat!
+  author: Author!
+  rating: Float
+  subtitle: String
+  pageCount: Int @deprecated(reason: "Use editions.pageCount")
+}
+
+type Author {
+  id: ID!
+  name: String! @deprecated(reason: "Use displayName")
+  displayName: String
+}
+
+type Review {
+  id: ID!
+  stars: Int!
+  body: String
+}
+
+input ReviewInput {
+  bookId: ID!
+  stars: Int!
+  body: String
+}
+
+enum BookFormat {
+  HARDCOVER
+  PAPERBACK
+  EBOOK
+}

@@ -1,0 +1,7 @@
+base: &base { a: 1 }
+openapi: 3.1.0
+info:
+  <<: *base
+  title: t
+  version: '1'
+paths: {}

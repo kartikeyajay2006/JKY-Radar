@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.example.com/user-profile.json",
+  "title": "UserProfile",
+  "type": "object",
+  "required": ["id", "displayName"],
+  "properties": {
+    "id": { "type": "string" },
+    "displayName": { "type": "string", "maxLength": 64 },
+    "age": { "type": "integer", "minimum": 13, "maximum": 120 },
+    "marketingOptIn": { "type": "boolean", "default": false },
+    "address": { "$ref": "#/$defs/Address" }
+  },
+  "$defs": {
+    "Address": {
+      "type": "object",
+      "properties": {
+        "line1": { "type": "string" },
+        "postcode": { "type": "string" }
+      }
+    }
+  }
+}

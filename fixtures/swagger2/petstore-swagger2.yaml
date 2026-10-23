@@ -1,0 +1,90 @@
+swagger: '2.0'
+info:
+  title: Petstore Lite
+  version: 1.0.0
+host: petstore.example.com
+basePath: /api
+schemes: [https]
+consumes: [application/json]
+produces: [application/json]
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: X-API-Key
+security:
+  - api_key: []
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      parameters:
+        - name: tags
+          in: query
+          type: array
+          items:
+            type: string
+          collectionFormat: multi
+        - name: limit
+          in: query
+          type: integer
+          maximum: 100
+      responses:
+        '200':
+          description: Pets
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Pet'
+    post:
+      operationId: addPet
+      parameters:
+        - name: pet
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/NewPet'
+      responses:
+        '200':
+          description: Created
+          schema:
+            $ref: '#/definitions/Pet'
+  /pets/{id}/photo:
+    post:
+      operationId: uploadPhoto
+      consumes: [multipart/form-data]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: integer
+        - name: file
+          in: formData
+          type: file
+          required: true
+        - name: caption
+          in: formData
+          type: string
+      responses:
+        '204':
+          description: Uploaded
+definitions:
+  Pet:
+    type: object
+    required: [id, name]
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      tag:
+        type: string
+  NewPet:
+    type: object
+    required: [name]
+    properties:
+      name:
+        type: string
+      tag:
+        type: string

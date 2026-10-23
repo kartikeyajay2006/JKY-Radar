@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package shopwave.orders.v1;
+
+// Synthetic order service used by the JKY-Radar demo.
+service OrderService {
+  rpc GetOrder (GetOrderRequest) returns (Order);
+  rpc ListOrders (ListOrdersRequest) returns (ListOrdersResponse);
+  rpc WatchOrder (GetOrderRequest) returns (OrderEvent);
+  rpc RefundOrder (RefundOrderRequest) returns (Order);
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message ListOrdersRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  OrderStatus status = 3;
+}
+
+message ListOrdersResponse {
+  repeated Order orders = 1;
+  string next_page_token = 2;
+}
+
+message RefundOrderRequest {
+  string order_id = 1;
+}
+
+message Order {
+  string id = 1;
+  OrderStatus status = 2;
+  int64 total_cents = 3;
+  string buyer_email = 4;
+  repeated string tags = 5;
+  int32 currency = 6;
+  string note = 9;
+}
+
+message OrderEvent {
+  string order_id = 1;
+  OrderStatus status = 2;
+}
+
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  PAID = 2;
+  SHIPPED = 3;
+  REFUNDED = 4;
+}

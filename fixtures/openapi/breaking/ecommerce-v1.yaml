@@ -1,0 +1,226 @@
+openapi: 3.0.3
+info:
+  title: ShopWave Commerce API
+  version: 1.4.0
+  description: Synthetic e-commerce API used by the JKY-Radar demo. Not a real service.
+servers:
+  - url: https://api.shopwave.example/v1
+security:
+  - oauth2: [orders:read]
+paths:
+  /orders:
+    get:
+      operationId: listOrders
+      summary: List orders
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, paid, shipped, cancelled]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: A page of orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderList'
+    post:
+      operationId: createOrder
+      summary: Create an order
+      security:
+        - oauth2: [orders:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrder'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /orders/{orderId}:
+    get:
+      operationId: getOrder
+      summary: Get an order by id
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: The order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /customers/{customerId}:
+    get:
+      operationId: getCustomer
+      summary: Get a customer profile
+      security:
+        - oauth2: [customers:read]
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The customer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+  /payments:
+    post:
+      operationId: createPayment
+      summary: Capture a payment for an order
+      security:
+        - oauth2: [payments:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, amount, method]
+              properties:
+                orderId:
+                  type: string
+                  format: uuid
+                amount:
+                  type: number
+                  minimum: 0
+                method:
+                  type: string
+                  enum: [card, paypal, bank_transfer]
+      responses:
+        '201':
+          description: Payment captured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.shopwave.example/oauth/token
+          scopes:
+            orders:read: Read orders
+            orders:write: Create orders
+            customers:read: Read customers
+            customers:pii: Read customer personal data
+            payments:write: Capture payments
+  schemas:
+    OrderList:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        nextCursor:
+          type: string
+          nullable: true
+    CreateOrder:
+      type: object
+      required: [customerId, lines]
+      properties:
+        customerId:
+          type: string
+        lines:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/OrderLine'
+        notes:
+          type: string
+          maxLength: 500
+    OrderLine:
+      type: object
+      required: [sku, quantity]
+      properties:
+        sku:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+    Order:
+      type: object
+      required: [id, status, total, customer]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, paid, shipped, cancelled]
+        total:
+          type: number
+        customer:
+          $ref: '#/components/schemas/Customer'
+    Customer:
+      type: object
+      required: [id, email, name]
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        tier:
+          type: string
+          enum: [standard, gold]
+    Payment:
+      type: object
+      required: [id, status, amount]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [captured, failed]
+        amount:
+          type: number
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string

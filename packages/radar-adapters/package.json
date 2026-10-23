@@ -1,0 +1,20 @@
+{
+  "name": "@jky/radar-adapters",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure parsers and protocol adapters for JKY-Radar (OpenAPI, Swagger 2.0, GraphQL, Postman, JSON Schema, manual REST, Protobuf, AsyncAPI).",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./browser": "./src/browser.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jky/radar-core": "1.0.0",
+    "graphql": "^16.11.0",
+    "protobufjs": "^7.5.0",
+    "yaml": "^2.8.0"
+  }
+}

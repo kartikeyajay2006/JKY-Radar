@@ -1,0 +1,13 @@
+{
+  "name": "@jky/radar-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pure TypeScript compatibility engine for JKY-Radar: domain model, rule registry, schema comparison, HTTP differ, coverage and release gate.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

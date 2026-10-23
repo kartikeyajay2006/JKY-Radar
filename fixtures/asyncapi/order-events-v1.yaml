@@ -1,0 +1,61 @@
+asyncapi: 2.6.0
+info:
+  title: ShopWave Order Events
+  version: 1.0.0
+servers:
+  production:
+    url: broker.shopwave.example:9092
+    protocol: kafka
+channels:
+  orders.created:
+    subscribe:
+      operationId: publishOrderCreated
+      message:
+        $ref: '#/components/messages/OrderCreated'
+  orders.cancelled:
+    subscribe:
+      operationId: publishOrderCancelled
+      message:
+        $ref: '#/components/messages/OrderCancelled'
+  payments.captured:
+    publish:
+      operationId: consumePaymentCaptured
+      message:
+        $ref: '#/components/messages/PaymentCaptured'
+components:
+  messages:
+    OrderCreated:
+      name: OrderCreated
+      contentType: application/json
+      payload:
+        type: object
+        required: [orderId, total, currency]
+        properties:
+          orderId:
+            type: string
+          total:
+            type: number
+          currency:
+            type: string
+    OrderCancelled:
+      name: OrderCancelled
+      contentType: application/json
+      payload:
+        type: object
+        required: [orderId]
+        properties:
+          orderId:
+            type: string
+          reason:
+            type: string
+    PaymentCaptured:
+      name: PaymentCaptured
+      contentType: application/json
+      payload:
+        type: object
+        required: [paymentId, orderId]
+        properties:
+          paymentId:
+            type: string
+          orderId:
+            type: string

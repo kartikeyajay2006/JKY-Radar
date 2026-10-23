@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info:
+  title: PetCatalog API
+  version: 1.0.0
+paths:
+  /pets/{petId}:
+    get:
+      operationId: getPet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A pet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+  /categories:
+    get:
+      operationId: listCategories
+      responses:
+        '200':
+          description: Category tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+components:
+  schemas:
+    Pet:
+      oneOf:
+        - $ref: '#/components/schemas/Cat'
+        - $ref: '#/components/schemas/Dog'
+    Cat:
+      type: object
+      required: [kind, name]
+      properties:
+        kind:
+          type: string
+          enum: [cat]
+        name:
+          type: string
+        nickname:
+          type: string
+          nullable: true
+    Dog:
+      type: object
+      required: [kind, name]
+      properties:
+        kind:
+          type: string
+          enum: [dog]
+        name:
+          type: string
+    Category:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        parent:
+          $ref: '#/components/schemas/Category'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'

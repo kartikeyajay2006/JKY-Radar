@@ -1,0 +1,168 @@
+[
+  {
+    "id": "openapi-ecommerce",
+    "name": "ShopWave Commerce API v1.4 → v2.0",
+    "protocol": "openapi",
+    "baseline": "openapi/breaking/ecommerce-v1.yaml",
+    "candidate": "openapi/breaking/ecommerce-v2.yaml",
+    "demo": true,
+    "expect": {
+      "gate": "block",
+      "coverage": "full",
+      "include": [
+        "HTTP_OPERATION_REMOVED",
+        "REQ_PROPERTY_REQUIRED_ADDED",
+        "REQ_ENUM_VALUE_REMOVED",
+        "RES_PROPERTY_REMOVED",
+        "HTTP_SECURITY_SCOPES_ADDED",
+        "RES_ENUM_VALUE_ADDED",
+        "HTTP_OPERATION_ADDED",
+        "HTTP_DOCS_CHANGED"
+      ],
+      "exclude": ["HTTP_SECURITY_ADDED", "REQ_PROPERTY_REMOVED", "SCHEMA_COMBINATOR_CHANGED"]
+    }
+  },
+  {
+    "id": "openapi-uncertain",
+    "name": "PetCatalog OAS 3.0 → 3.1 (nullability, oneOf, circular refs)",
+    "protocol": "openapi",
+    "baseline": "openapi/uncertain/catalog-v1.yaml",
+    "candidate": "openapi/uncertain/catalog-v2.yaml",
+    "demo": true,
+    "expect": {
+      "gate": "inconclusive",
+      "coverage": "partial",
+      "include": ["SCHEMA_COMBINATOR_CHANGED"],
+      "exclude": ["RES_NULL_ADDED", "REQ_NULL_REMOVED", "RES_TYPE_CHANGED", "SCHEMA_DEPTH_LIMIT"]
+    }
+  },
+  {
+    "id": "openapi-safe",
+    "name": "Inventory API additive release",
+    "protocol": "openapi",
+    "baseline": "openapi/safe/inventory-v1.json",
+    "candidate": "openapi/safe/inventory-v2.json",
+    "demo": false,
+    "expect": {
+      "gate": "pass",
+      "coverage": "full",
+      "include": ["HTTP_OPERATION_ADDED", "HTTP_PARAM_OPTIONAL_ADDED", "RES_PROPERTY_ADDED", "REQ_CONSTRAINT_RELAXED", "RES_PROPERTY_BECAME_REQUIRED"],
+      "exclude": ["HTTP_OPERATION_REMOVED", "REQ_CONSTRAINT_TIGHTENED", "RES_PROPERTY_REMOVED"]
+    }
+  },
+  {
+    "id": "graphql-bookstore",
+    "name": "Bookstore GraphQL schema",
+    "protocol": "graphql",
+    "baseline": "graphql/bookstore-v1.graphql",
+    "candidate": "graphql/bookstore-v2.graphql",
+    "demo": true,
+    "expect": {
+      "gate": "block",
+      "coverage": "full",
+      "include": ["GQL_FIELD_REMOVED", "GQL_REQUIRED_ARG_ADDED", "GQL_ENUM_VALUE_REMOVED", "GQL_FIELD_ADDED", "GQL_FIELD_DEPRECATED"],
+      "exclude": ["GQL_UPSTREAM_UNMATCHED", "GQL_TYPE_REMOVED"]
+    }
+  },
+  {
+    "id": "postman-payments",
+    "name": "PayFlow Postman collection",
+    "protocol": "postman2",
+    "baseline": "postman2/payments-v1.postman_collection.json",
+    "candidate": "postman2/payments-v2.postman_collection.json",
+    "demo": true,
+    "expect": {
+      "gate": "warn",
+      "coverage": "partial",
+      "include": ["POSTMAN_REQUEST_METHOD_CHANGED", "POSTMAN_REQUEST_REMOVED", "POSTMAN_VARIABLE_RENAMED"],
+      "exclude": ["HTTP_OPERATION_REMOVED"]
+    }
+  },
+  {
+    "id": "swagger2-cross",
+    "name": "Petstore Swagger 2.0 → equivalent OpenAPI 3.0 (cross-format)",
+    "protocol": "openapi",
+    "baseline": "swagger2/petstore-swagger2.yaml",
+    "candidate": "swagger2/petstore-openapi3.yaml",
+    "options": { "allowCrossFormat": true },
+    "demo": false,
+    "expect": {
+      "gate": "warn",
+      "coverage": "partial",
+      "include": ["XFMT_PROJECTION_LOSSY"],
+      "exclude": ["HTTP_OPERATION_REMOVED", "HTTP_PARAM_STYLE_CHANGED", "HTTP_REQUEST_MEDIA_TYPE_REMOVED", "HTTP_SECURITY_TIGHTENED", "REQ_TYPE_NARROWED"]
+    }
+  },
+  {
+    "id": "jsonschema-request",
+    "name": "UserProfile schema as request input",
+    "protocol": "json-schema",
+    "baseline": "json-schema/user-profile-v1.json",
+    "candidate": "json-schema/user-profile-v2.json",
+    "options": { "jsonSchemaPolarity": "request" },
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "full",
+      "include": ["REQ_PROPERTY_REQUIRED_ADDED", "REQ_CONSTRAINT_TIGHTENED", "REQ_CONSTRAINT_RELAXED"],
+      "exclude": ["RES_PROPERTY_ADDED"]
+    }
+  },
+  {
+    "id": "jsonschema-response",
+    "name": "UserProfile schema as response output",
+    "protocol": "json-schema",
+    "baseline": "json-schema/user-profile-v1.json",
+    "candidate": "json-schema/user-profile-v2.json",
+    "options": { "jsonSchemaPolarity": "response" },
+    "demo": false,
+    "expect": {
+      "gate": "warn",
+      "coverage": "full",
+      "include": ["RES_PROPERTY_ADDED", "RES_CONSTRAINT_RELAXED", "RES_CONSTRAINT_TIGHTENED"],
+      "exclude": ["REQ_PROPERTY_REQUIRED_ADDED"]
+    }
+  },
+  {
+    "id": "protobuf-orders",
+    "name": "OrderService gRPC contract",
+    "protocol": "grpc",
+    "baseline": "protobuf/orders-v1.proto",
+    "candidate": "protobuf/orders-v2.proto",
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "partial",
+      "include": ["PROTO_RPC_REMOVED", "PROTO_RPC_STREAMING_CHANGED", "PROTO_FIELD_NUMBER_REUSED", "PROTO_FIELD_RENAMED", "PROTO_FIELD_WIRE_TYPE_CHANGED", "PROTO_FIELD_TYPE_CHANGED_COMPATIBLE", "PROTO_ENUM_NUMBER_REUSED", "PROTO_RPC_ADDED"],
+      "exclude": ["PROTO_PACKAGE_CHANGED"]
+    }
+  },
+  {
+    "id": "asyncapi-orders",
+    "name": "Order events (AsyncAPI 2.6)",
+    "protocol": "asyncapi",
+    "baseline": "asyncapi/order-events-v1.yaml",
+    "candidate": "asyncapi/order-events-v2.yaml",
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "partial",
+      "include": ["ASYNC_CHANNEL_REMOVED", "RES_PROPERTY_BECAME_OPTIONAL", "REQ_PROPERTY_REQUIRED_ADDED", "RES_PROPERTY_ADDED"],
+      "exclude": ["ASYNC_OPERATION_REMOVED"]
+    }
+  },
+  {
+    "id": "manual-billing",
+    "name": "Billing manual REST contract",
+    "protocol": "manual-rest",
+    "baseline": "manual/billing-v1.json",
+    "candidate": "manual/billing-v2.json",
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "partial",
+      "include": ["REQ_PROPERTY_REQUIRED_ADDED", "SCHEMA_FORMAT_CHANGED"],
+      "exclude": ["HTTP_OPERATION_REMOVED"]
+    }
+  }
+]

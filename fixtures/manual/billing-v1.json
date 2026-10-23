@@ -1,0 +1,34 @@
+{
+  "jkyManualRest": "1.0",
+  "title": "Billing (manual contract)",
+  "version": "1.0.0",
+  "servers": ["https://billing.example.com"],
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/invoices/{invoiceId}",
+      "parameters": [{ "name": "invoiceId", "in": "path", "required": true, "schema": { "type": "string" } }],
+      "responses": [
+        {
+          "status": "200",
+          "contentType": "application/json",
+          "schema": {
+            "type": "object",
+            "required": ["id", "amount", "dueDate"],
+            "properties": { "id": { "type": "string" }, "amount": { "type": "number" }, "dueDate": { "type": "string", "format": "date" } }
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/invoices",
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "schema": { "type": "object", "required": ["customerId", "amount"], "properties": { "customerId": { "type": "string" }, "amount": { "type": "number" } } }
+      },
+      "responses": [{ "status": "201", "contentType": "application/json", "schema": { "type": "object", "properties": { "id": { "type": "string" } } } }]
+    }
+  ]
+}

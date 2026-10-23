@@ -1,0 +1,12 @@
+openapi: 3.0.3
+info: { title: Cycle, version: '1' }
+paths:
+  /x:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/A'
+      responses: { '200': { description: ok } }
+components:
+  parameters:
+    A: { $ref: '#/components/parameters/B' }
+    B: { $ref: '#/components/parameters/A' }

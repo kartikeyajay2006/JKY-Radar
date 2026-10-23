@@ -1,0 +1,17 @@
+{
+  "name": "@jky/radar-cli",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Command-line interface for the JKY-Radar engine (offline, no server required).",
+  "type": "module",
+  "bin": {
+    "jky-radar": "./src/cli.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@jky/radar-adapters": "1.0.0",
+    "@jky/radar-core": "1.0.0"
+  }
+}

@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info: { title: ReDoS, version: '1' }
+paths:
+  /x:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema: { type: string, pattern: '^(a+)+$' }
+      responses: { '200': { description: ok } }
