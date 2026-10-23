@@ -1,0 +1,30 @@
+openapi: 3.2.0
+info:
+  title: Reports API
+  version: 1.0.0
+paths:
+  /reports:
+    query:
+      operationId: searchReports
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [range]
+              properties:
+                range: { type: string, enum: [day, week] }
+      responses:
+        '200':
+          description: Matching reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+    get:
+      operationId: listReports
+      responses:
+        '200':
+          description: Reports

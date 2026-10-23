@@ -64,3 +64,19 @@ describe('e-commerce demo specifics', () => {
     expect(r.findings.find((f) => f.ruleId === 'HTTP_OPERATION_REMOVED')!.entityKey).toBe('GET /orders/{}');
   });
 });
+
+describe('GraphQL input forms', () => {
+  it('SDL and introspection JSON of the same schemas yield the same findings', () => {
+    const run = (a: string, b: string) => {
+      const out = analyzeContracts({
+        baseline: { content: fixture(a), fileName: a },
+        candidate: { content: fixture(b), fileName: b },
+      });
+      if (!out.ok) throw new Error(out.message);
+      return out.result.findings.map((f) => `${f.ruleId} ${f.logicalPath}`).sort();
+    };
+    expect(run('graphql/bookstore-v1.introspection.json', 'graphql/bookstore-v2.introspection.json')).toEqual(
+      run('graphql/bookstore-v1.graphql', 'graphql/bookstore-v2.graphql'),
+    );
+  });
+});

@@ -1,0 +1,50 @@
+asyncapi: 3.0.0
+info:
+  title: Notification Events
+  version: 2.0.0
+servers:
+  production:
+    host: mq.example.com
+    protocol: amqp
+channels:
+  userSignedUp:
+    address: user.signedup
+    messages:
+      UserSignedUp:
+        $ref: '#/components/messages/UserSignedUp'
+  emailRequested:
+    address: email.requested
+    messages:
+      EmailRequested:
+        $ref: '#/components/messages/EmailRequested'
+operations:
+  publishUserSignedUp:
+    action: send
+    channel:
+      $ref: '#/channels/userSignedUp'
+    messages:
+      - $ref: '#/channels/userSignedUp/messages/UserSignedUp'
+  consumeEmailRequested:
+    action: send
+    channel:
+      $ref: '#/channels/emailRequested'
+    messages:
+      - $ref: '#/channels/emailRequested/messages/EmailRequested'
+components:
+  messages:
+    UserSignedUp:
+      contentType: application/json
+      payload:
+        type: object
+        required: [userId]
+        properties:
+          userId: { type: string }
+          email: { type: string, format: email }
+    EmailRequested:
+      contentType: application/json
+      payload:
+        type: object
+        required: [to, template]
+        properties:
+          to: { type: string }
+          template: { type: string, enum: [welcome] }

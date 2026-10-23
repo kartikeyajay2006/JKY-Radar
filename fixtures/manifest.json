@@ -259,5 +259,85 @@
         "HTTP_OPERATION_REMOVED"
       ]
     }
+  },
+  {
+    "id": "asyncapi3-notifications",
+    "name": "Notification events (AsyncAPI 3.0)",
+    "protocol": "asyncapi",
+    "baseline": "asyncapi/notifications-v3-a.yaml",
+    "candidate": "asyncapi/notifications-v3-b.yaml",
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "partial",
+      "include": [
+        "ASYNC_OPERATION_ACTION_CHANGED",
+        "RES_PROPERTY_BECAME_OPTIONAL"
+      ],
+      "exclude": [
+        "ASYNC_CHANNEL_REMOVED",
+        "REQ_ENUM_VALUE_REMOVED"
+      ]
+    }
+  },
+  {
+    "id": "openapi32-reports",
+    "name": "Reports API (OpenAPI 3.2 QUERY method)",
+    "protocol": "openapi",
+    "baseline": "openapi/safe/reports-oas32-v1.yaml",
+    "candidate": "openapi/safe/reports-oas32-v2.yaml",
+    "demo": false,
+    "expect": {
+      "gate": "warn",
+      "coverage": "partial",
+      "include": [
+        "REQ_ENUM_VALUE_ADDED"
+      ],
+      "exclude": [
+        "HTTP_OPERATION_REMOVED"
+      ]
+    }
+  },
+  {
+    "id": "graphql-introspection",
+    "name": "Bookstore schema as introspection JSON",
+    "protocol": "graphql",
+    "baseline": "graphql/bookstore-v1.introspection.json",
+    "candidate": "graphql/bookstore-v2.introspection.json",
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "partial",
+      "include": [
+        "GQL_FIELD_REMOVED",
+        "GQL_REQUIRED_ARG_ADDED",
+        "GQL_ENUM_VALUE_REMOVED",
+        "GQL_FIELD_DEPRECATED"
+      ],
+      "exclude": [
+        "GQL_UPSTREAM_UNMATCHED"
+      ]
+    }
+  },
+  {
+    "id": "swagger2-petstore",
+    "name": "Petstore Swagger 2.0 release",
+    "protocol": "swagger2",
+    "baseline": "swagger2/petstore-swagger2.yaml",
+    "candidate": "swagger2/petstore-swagger2-v2.yaml",
+    "demo": false,
+    "expect": {
+      "gate": "block",
+      "coverage": "full",
+      "include": [
+        "REQ_CONSTRAINT_TIGHTENED",
+        "REQ_PROPERTY_REQUIRED_ADDED",
+        "REQ_PROPERTY_BECAME_REQUIRED"
+      ],
+      "exclude": [
+        "HTTP_OPERATION_REMOVED",
+        "XFMT_PROJECTION_LOSSY"
+      ]
+    }
   }
 ]
