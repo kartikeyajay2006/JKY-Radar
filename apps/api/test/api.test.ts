@@ -240,6 +240,21 @@ describe('analysis lifecycle', () => {
     expect(r.body.data.id).toBe(analysisId);
     expect(r.body.data.cached).toBe(true);
   });
+  it('records declared operation renames in the audit log', async () => {
+    const r = await owner.post(`/api/v1/projects/${projectId}/analyses`, {
+      baselineId: v1,
+      candidateId: v2,
+      options: { operationAliases: { 'GET /orders/{orderId}': 'GET /orders' } },
+    });
+    expect(r.status).toBe(202);
+    await waitForAnalysis(owner, r.body.data.id);
+    const audit = await owner.get(`/api/v1/workspaces/${wid}/audit?pageSize=100`);
+    const ev = audit.body.data.find(
+      (e: { action: string; resourceId: string }) =>
+        e.action === 'analysis.requested' && e.resourceId === r.body.data.id,
+    );
+    expect(ev.metadata.operationAliases).toEqual({ 'GET /orders/{orderId}': 'GET /orders' });
+  });
   it('paginates, filters and searches findings', async () => {
     const all = await owner.get(`/api/v1/analyses/${analysisId}/findings?pageSize=5`);
     expect(all.body.data).toHaveLength(5);

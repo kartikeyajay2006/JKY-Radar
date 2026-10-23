@@ -80,3 +80,32 @@ describe('GraphQL input forms', () => {
     );
   });
 });
+
+describe('operation aliases', () => {
+  const doc = (path: string, extra = '') =>
+    JSON.stringify({
+      openapi: '3.1.0',
+      info: { title: 't', version: '1' },
+      paths: {
+        [path]: {
+          get: { responses: { '200': { description: 'ok' } }, ...(extra ? { summary: extra } : {}) },
+        },
+      },
+    });
+  it('a declared rename is compared instead of reported as removed + added', () => {
+    const without = analyzeContracts({
+      baseline: { content: doc('/v1/users') },
+      candidate: { content: doc('/users', 'moved') },
+    });
+    const withAlias = analyzeContracts({
+      baseline: { content: doc('/v1/users') },
+      candidate: { content: doc('/users', 'moved') },
+      options: { operationAliases: { 'GET /v1/users': 'GET /users' } },
+    });
+    if (!without.ok || !withAlias.ok) throw new Error('analysis failed');
+    expect(without.result.findings.map((f) => f.ruleId)).toContain('HTTP_OPERATION_REMOVED');
+    const ids = withAlias.result.findings.map((f) => f.ruleId);
+    expect(ids).not.toContain('HTTP_OPERATION_REMOVED');
+    expect(ids).toContain('HTTP_DOCS_CHANGED');
+  });
+});

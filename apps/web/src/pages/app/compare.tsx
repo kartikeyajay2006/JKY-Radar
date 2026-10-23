@@ -27,6 +27,20 @@ export default function ComparePage() {
   const [cross, setCross] = useState(false);
   const [polarity, setPolarity] = useState<'request' | 'response'>('response');
   const [informational, setInformational] = useState(true);
+  const [aliasText, setAliasText] = useState('');
+  const aliases = useMemo(() => {
+    const out: Record<string, string> = {};
+    const bad: string[] = [];
+    for (const line of aliasText
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)) {
+      const m = /^([A-Za-z]+\s+\S+)\s*(?:->|→)\s*([A-Za-z]+\s+\S+)$/.exec(line);
+      if (m) out[m[1]!] = m[2]!;
+      else bad.push(line);
+    }
+    return { out, bad };
+  }, [aliasText]);
 
   useEffect(() => {
     const v = versions.data;
@@ -81,6 +95,7 @@ export default function ComparePage() {
           includeInformational: informational,
           ...(compat?.needsCross ? { allowCrossFormat: true } : {}),
           ...(b?.protocol === 'json-schema' ? { jsonSchemaPolarity: polarity } : {}),
+          ...(Object.keys(aliases.out).length ? { operationAliases: aliases.out } : {}),
         },
       },
       {
@@ -191,6 +206,28 @@ export default function ComparePage() {
             />{' '}
             Include documentation-only changes as informational findings
           </label>
+          {b && ['openapi', 'swagger2', 'manual-rest'].includes(b.protocol) && (
+            <details className="text-sm">
+              <summary className="cursor-pointer text-fg-soft">
+                Declare intentional renames (optional)
+              </summary>
+              <p className="mt-2 text-xs text-muted">
+                One per line, for example <code>GET /v1/users -&gt; GET /users</code>. Renamed operations are
+                compared with each other instead of being reported as removed and added. The mapping is stored
+                with the analysis and written to the audit log.
+              </p>
+              <textarea
+                aria-label="Operation renames"
+                className="mt-2 min-h-20 w-full rounded-[var(--radius-control)] border border-line bg-surface px-3 py-2 font-mono text-xs"
+                value={aliasText}
+                onChange={(e) => setAliasText(e.target.value)}
+                placeholder="GET /v1/users -> GET /users"
+              />
+              {aliases.bad.length > 0 && (
+                <p className="text-xs text-breaking">Not understood: {aliases.bad.join('; ')}</p>
+              )}
+            </details>
+          )}
         </fieldset>
 
         <div className="mt-6 flex items-center gap-3 border-t border-line pt-5">
@@ -199,7 +236,7 @@ export default function ComparePage() {
             size="lg"
             icon={<Radar className="size-4" />}
             loading={run.isPending}
-            disabled={!compat?.ok}
+            disabled={!compat?.ok || aliases.bad.length > 0}
             onClick={start}
           >
             Run Radar analysis

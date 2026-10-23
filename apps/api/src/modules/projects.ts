@@ -254,7 +254,14 @@ export function projectsRouter(
         action: 'analysis.requested',
         resourceType: 'analysis',
         resourceId: analysis._id,
-        metadata: { baseline: bv.label, candidate: cv.label, policyRevision: policy.revision },
+        metadata: {
+          baseline: bv.label,
+          candidate: cv.label,
+          policyRevision: policy.revision,
+          ...(options.operationAliases && Object.keys(options.operationAliases).length
+            ? { operationAliases: options.operationAliases }
+            : {}),
+        },
       });
       runner.enqueue(analysis._id.toString());
       const names = await userNames([access.userId]);
