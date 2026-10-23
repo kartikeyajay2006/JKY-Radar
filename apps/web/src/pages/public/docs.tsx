@@ -241,7 +241,7 @@ export default function DocsPage() {
                     </span>
                   )}
                 </div>
-                <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
+                <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted">
                   <div>
                     Parse: <span className="text-fg-soft">{c.levels.parse}</span>
                   </div>
@@ -254,7 +254,7 @@ export default function DocsPage() {
                   <div>
                     Formats: <span className="text-fg-soft">{c.formats.join(', ')}</span>
                   </div>
-                </dl>
+                </div>
                 <ul className="mt-2 list-disc space-y-0.5 pl-5 text-sm text-fg-soft">
                   {c.notes.map((n) => (
                     <li key={n}>{n}</li>

@@ -13,6 +13,7 @@ import { useConsumers, useEntities, useInvalidate } from '@/lib/queries';
 import { timeAgo } from '@/lib/format';
 import { cn } from '@/lib/cn';
 import { useProjectCtx } from './project-layout';
+import { useConfirm } from '@/components/ui/confirm';
 
 const CRIT_CLS = {
   critical: 'text-breaking',
@@ -250,6 +251,7 @@ export default function ConsumersPage() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<ConsumerDTO | null>(null);
   const canEdit = roleAllows(project.role, 'consumer.manage');
+  const confirm = useConfirm();
   const create = useMutation({
     mutationFn: (v: object) => api.post(`/projects/${project.id}/consumers`, v),
     onSuccess: async () => {
@@ -332,7 +334,14 @@ export default function ConsumersPage() {
                       size="sm"
                       variant="ghost"
                       className="text-breaking"
-                      onClick={() => confirm(`Remove ${c.name} and its dependencies?`) && remove.mutate(c.id)}
+                      onClick={async () =>
+                        (await confirm({
+                          title: `Remove ${c.name}?`,
+                          body: 'Its registered dependencies are removed too. Past analyses are not changed.',
+                          confirmLabel: 'Remove consumer',
+                          danger: true,
+                        })) && remove.mutate(c.id)
+                      }
                     >
                       Remove
                     </Button>

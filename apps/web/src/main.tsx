@@ -9,6 +9,7 @@ import { AuthProvider } from '@/lib/auth';
 import { ThemeProvider, useTheme } from '@/lib/theme';
 import { TooltipProvider } from '@/components/ui/overlay';
 import { router } from '@/app/router';
+import { ConfirmProvider } from '@/components/ui/confirm';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,8 +41,10 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <TooltipProvider>
-            <RouterProvider router={router} />
-            <ThemedToaster />
+            <ConfirmProvider>
+              <RouterProvider router={router} />
+              <ThemedToaster />
+            </ConfirmProvider>
           </TooltipProvider>
         </AuthProvider>
       </QueryClientProvider>

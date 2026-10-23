@@ -66,7 +66,7 @@ export function LoginPage() {
       footer={
         <>
           New to JKY-Radar?{' '}
-          <Link className="text-accent hover:underline" to="/register">
+          <Link className="text-accent underline underline-offset-2" to="/register">
             Create an account
           </Link>
         </>
@@ -142,7 +142,7 @@ export function RegisterPage() {
       footer={
         <>
           Already have an account?{' '}
-          <Link className="text-accent hover:underline" to="/login">
+          <Link className="text-accent underline underline-offset-2" to="/login">
             Sign in
           </Link>
         </>

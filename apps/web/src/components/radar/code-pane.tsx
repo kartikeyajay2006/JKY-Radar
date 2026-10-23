@@ -85,9 +85,19 @@ export default function CodePane({
       syntaxHighlighting(highlight),
       lineDecorations(highlights),
       EditorView.lineWrapping,
-      EditorView.contentAttributes.of({ 'aria-label': ariaLabel }),
+      EditorView.contentAttributes.of(
+        editable
+          ? { 'aria-label': ariaLabel, tabindex: '0' }
+          : {
+              'aria-label': ariaLabel,
+              tabindex: '0',
+              role: 'textbox',
+              'aria-readonly': 'true',
+              'aria-multiline': 'true',
+            },
+      ),
     ],
-    [lang, highlights, ariaLabel],
+    [lang, highlights, ariaLabel, editable],
   );
 
   useEffect(() => {

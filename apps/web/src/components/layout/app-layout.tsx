@@ -174,7 +174,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             <it.icon className="size-4" aria-hidden />
             {it.label}
             {!!it.badge && (
-              <span className="tabular ml-auto rounded-full bg-accent px-1.5 text-[11px] font-medium text-accent-fg">
+              <span className="tabular ml-auto rounded-full bg-accent-solid px-1.5 text-[11px] font-medium text-accent-fg">
                 {it.badge}
               </span>
             )}

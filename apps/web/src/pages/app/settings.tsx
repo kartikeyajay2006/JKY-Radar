@@ -13,6 +13,7 @@ import { useAuth } from '@/lib/auth';
 import { useInvalidate, useInvitations, useMembers } from '@/lib/queries';
 import { useTheme, type ThemePref } from '@/lib/theme';
 import { dateTime } from '@/lib/format';
+import { useConfirm } from '@/components/ui/confirm';
 
 function Profile() {
   const { user, signOut } = useAuth();
@@ -111,6 +112,7 @@ function Workspace() {
   const [role, setRole] = useState<Role>('VIEWER');
   useEffect(() => setName(current?.name ?? ''), [current?.name]);
   const isAdmin = current ? roleAllows(current.role, 'members.manage') : false;
+  const confirm = useConfirm();
   const rename = useMutation({
     mutationFn: () => api.patch(`/workspaces/${current!.id}`, { name }),
     onSuccess: async () => {
@@ -272,10 +274,17 @@ function Workspace() {
                             size="sm"
                             variant="ghost"
                             className="text-breaking"
-                            onClick={() =>
-                              confirm(self ? 'Leave this workspace?' : `Remove ${m.name}?`) &&
-                              remove.mutate(m.id)
-                            }
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: self ? 'Leave this workspace?' : `Remove ${m.name}?`,
+                                body: self
+                                  ? 'You lose access until someone invites you again.'
+                                  : 'They lose access to every project in this workspace.',
+                                confirmLabel: self ? 'Leave workspace' : 'Remove member',
+                                danger: true,
+                              });
+                              if (ok) remove.mutate(m.id);
+                            }}
                           >
                             {self ? 'Leave' : 'Remove'}
                           </Button>
