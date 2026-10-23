@@ -1,0 +1,38 @@
+# Render Blueprint: one Node web service that serves both the API and the built web
+# app from the same origin (simplest secure cookie setup). MongoDB is external
+# (MongoDB Atlas); paste its connection string when Render prompts for MONGODB_URI.
+services:
+  - type: web
+    name: jky-radar
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '22.12.0'
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_WEB
+        value: 'true'
+      - key: TRUST_PROXY
+        value: '1'
+      - key: MONGODB_URI
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: WEB_ORIGIN
+        sync: false # e.g. https://jky-radar.onrender.com (the service URL)
+      - key: API_ORIGIN
+        sync: false # same value as WEB_ORIGIN
+      - key: ANALYSIS_ISOLATION
+        value: worker
+      - key: ANALYSIS_CONCURRENCY
+        value: '1'
+      - key: DEMO_SEED_ENABLED
+        value: 'true'
+      - key: ENABLE_REMOTE_URL_IMPORT
+        value: 'false'

@@ -34,15 +34,13 @@ const limiter = (env: Env, windowMs: number, limit: number, key: 'ip' | 'user' =
     legacyHeaders: false,
     keyGenerator: key === 'user' ? (req) => req.auth?.userId?.toString() ?? req.ip ?? 'anon' : undefined,
     handler: (req, res) => {
-      res
-        .status(429)
-        .json({
-          error: {
-            code: 'RATE_LIMITED',
-            message: 'Too many requests. Please slow down and retry shortly.',
-            requestId: req.requestId,
-          },
-        });
+      res.status(429).json({
+        error: {
+          code: 'RATE_LIMITED',
+          message: 'Too many requests. Please slow down and retry shortly.',
+          requestId: req.requestId,
+        },
+      });
     },
   });
 };
@@ -70,6 +68,7 @@ export function createApp({ env, runner = new AnalysisRunner(env) }: AppDeps) {
           'object-src': ["'none'"],
           'base-uri': ["'self'"],
           'form-action': ["'self'"],
+          'upgrade-insecure-requests': env.NODE_ENV === 'production' ? [] : null,
         },
       },
       crossOriginEmbedderPolicy: false,

@@ -45,13 +45,11 @@ test.describe.serial('core journey', () => {
   });
 
   test('invalid uploads show line-level diagnostics', async () => {
-    await page
-      .locator('input[type=file]')
-      .setInputFiles({
-        name: 'broken.yaml',
-        mimeType: 'application/x-yaml',
-        buffer: fx('adversarial/malformed.yaml'),
-      });
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'broken.yaml',
+      mimeType: 'application/x-yaml',
+      buffer: fx('adversarial/malformed.yaml'),
+    });
     await page.getByLabel('Version label').fill('broken');
     await page.getByRole('button', { name: 'Save version' }).click();
     await expect(page.getByRole('alert').first()).toContainText('line');

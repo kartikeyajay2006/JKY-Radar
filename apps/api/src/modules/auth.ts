@@ -179,9 +179,15 @@ export function authRouter(env: Env, limiter: RequestHandler) {
     '/session',
     asyncHandler(async (req, res) => {
       if (!req.auth) return void sendData(res, null);
-      const [user, session] = await Promise.all([User.findById(req.auth.userId), Session.findById(req.auth.sessionId).lean()]);
+      const [user, session] = await Promise.all([
+        User.findById(req.auth.userId),
+        Session.findById(req.auth.sessionId).lean(),
+      ]);
       if (!user || !session) return void sendData(res, null);
-      sendData(res, { user: toUserDTO(user), csrfToken: sessionCsrfToken(env, session._id.toString(), session.csrfSalt) } satisfies SessionDTO);
+      sendData(res, {
+        user: toUserDTO(user),
+        csrfToken: sessionCsrfToken(env, session._id.toString(), session.csrfSalt),
+      } satisfies SessionDTO);
     }),
   );
 

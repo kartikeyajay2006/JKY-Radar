@@ -29,15 +29,13 @@ export function accessLog(req: Request, res: Response, next: NextFunction) {
 }
 
 export function notFoundHandler(req: Request, res: Response) {
-  res
-    .status(404)
-    .json({
-      error: {
-        code: 'NOT_FOUND',
-        message: `No route for ${req.method} ${req.path}`,
-        requestId: req.requestId,
-      },
-    });
+  res.status(404).json({
+    error: {
+      code: 'NOT_FOUND',
+      message: `No route for ${req.method} ${req.path}`,
+      requestId: req.requestId,
+    },
+  });
 }
 
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction) {
@@ -96,9 +94,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
       requestId: req.requestId,
       err: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : String(err),
     });
-  res
-    .status(status)
-    .json({
-      error: { code, message, ...(details !== undefined ? { details } : {}), requestId: req.requestId },
-    });
+  res.status(status).json({
+    error: { code, message, ...(details !== undefined ? { details } : {}), requestId: req.requestId },
+  });
 }

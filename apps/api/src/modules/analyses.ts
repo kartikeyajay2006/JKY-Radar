@@ -33,7 +33,10 @@ export async function sendAnalysis(res: Response, a: AnalysisLike & Record<strin
     SpecVersion.findById(a.candidateId).lean(),
   ]);
   if (!bv || !cv) throw notFound('Analysis inputs');
-  const [names, project] = await Promise.all([userNames([a.createdBy]), Project.findById(a.projectId).select('name').lean()]);
+  const [names, project] = await Promise.all([
+    userNames([a.createdBy]),
+    Project.findById(a.projectId).select('name').lean(),
+  ]);
   sendData(res, { ...analysisDTO(a, bv, cv, names), ...(project ? { projectName: project.name } : {}) });
 }
 

@@ -169,7 +169,13 @@ const pdfText = (s: unknown) => {
   let out = '';
   for (const ch of mapped) {
     const c = ch.codePointAt(0)!;
-    const ok = c === 9 || c === 10 || c === 13 || (c >= 32 && c <= 126) || (c >= 160 && c <= 255) || '…–—•'.includes(ch);
+    const ok =
+      c === 9 ||
+      c === 10 ||
+      c === 13 ||
+      (c >= 32 && c <= 126) ||
+      (c >= 160 && c <= 255) ||
+      '…–—•'.includes(ch);
     out += ok ? ch : '?';
   }
   return out;

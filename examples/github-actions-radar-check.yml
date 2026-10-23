@@ -1,0 +1,30 @@
+# Example: block pull requests that break your API contract.
+# Copy into .github/workflows/ in a repository that contains a contract file and
+# vendors the JKY-Radar repository (or installs it) as tools/jky-radar.
+# This uses the offline CLI: no server, no tokens, no network calls to JKY-Radar.
+name: API contract check
+
+on:
+  pull_request:
+    paths: ['openapi.yaml']
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install JKY-Radar
+        run: |
+          git clone --depth 1 https://github.com/kartikeyajay2006/JKY-Radar.git tools/jky-radar
+          cd tools/jky-radar && npm ci --ignore-scripts
+      - name: Extract the baseline from the target branch
+        run: git show origin/${{ github.base_ref }}:openapi.yaml > /tmp/baseline.yaml
+      - name: Compare (fails the job when the gate blocks)
+        run: |
+          cd tools/jky-radar
+          npm run --silent radar -- compare /tmp/baseline.yaml "$GITHUB_WORKSPACE/openapi.yaml" --format md > "$GITHUB_STEP_SUMMARY"
