@@ -10,7 +10,7 @@ Vendor-neutral API contract compatibility analysis. Compare two versions of an A
 
 [![CI](https://github.com/kartikeyajay2006/JKY-Radar/actions/workflows/ci.yml/badge.svg)](https://github.com/kartikeyajay2006/JKY-Radar/actions/workflows/ci.yml)
 ![MERN](https://img.shields.io/badge/stack-MongoDB%20·%20Express%20·%20React%20·%20Node-3550e0)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES2023%20%2B%20JSDoc-f7df1e)
 ![License](https://img.shields.io/badge/license-MIT-0a7a56)
 
 </div>
@@ -87,11 +87,11 @@ Exit code 1 means the gate failed, 2 means an input could not be parsed. See [ex
 
 | Command                                                       | What it does                                                   |
 | ------------------------------------------------------------- | -------------------------------------------------------------- |
-| `npm run dev`                                                 | API (tsx watch) and web (Vite) together                        |
-| `npm run build`                                               | Production build of the web app and the bundled API            |
+| `npm run dev`                                                 | API (`node --watch`) and web (Vite) together                   |
+| `npm run build`                                               | Production build of the web app (the API runs from source)     |
 | `npm start`                                                   | Start the built API (serves the web app when `SERVE_WEB=true`) |
-| `npm run typecheck` / `npm run lint` / `npm run format:check` | Static checks                                                  |
-| `npm test`                                                    | 448 unit, integration and security tests (needs MongoDB)       |
+| `npm run typecheck` / `npm run lint` / `npm run format:check` | JSDoc type check, ESLint, Prettier                             |
+| `npm test`                                                    | 450 unit, integration and security tests (needs MongoDB)       |
 | `npm run test:e2e`                                            | Playwright journey, mobile and accessibility tests             |
 | `npm run seed:demo`                                           | Idempotent public demo seed                                    |
 | `npm run docs:matrix`                                         | Regenerate the support matrix and rule catalog from code       |
@@ -99,7 +99,7 @@ Exit code 1 means the gate failed, 2 means an input could not be parsed. See [ex
 
 ## Architecture
 
-A modular MERN monolith. The analysis engine is pure TypeScript, shared by the API, the browser playground and the CLI.
+A modular MERN monolith written in plain JavaScript (ES modules). Types are documented with JSDoc and checked by `npm run typecheck` (`tsc --checkJs`, no TypeScript source files). The analysis engine is pure JavaScript, shared by the API, the browser playground and the CLI.
 
 ```
 apps/web            React 19 + Vite + TanStack Query + Tailwind v4

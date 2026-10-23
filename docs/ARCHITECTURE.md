@@ -1,6 +1,6 @@
 # Architecture
 
-A modular MERN monolith: one Express API, one React SPA, one MongoDB database, and pure TypeScript analysis packages that are also used by the browser playground and the CLI. No microservices, no external paid services.
+A modular MERN monolith in plain JavaScript (ES modules, JSDoc types): one Express API, one React SPA, one MongoDB database, and pure JavaScript analysis packages that are also used by the browser playground and the CLI. No microservices, no external paid services.
 
 ```mermaid
 flowchart LR

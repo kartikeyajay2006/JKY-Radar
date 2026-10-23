@@ -2,9 +2,9 @@
 
 Short architecture decision records. Each lists the decision, the reason, and the trade-off accepted.
 
-1. **MERN with TypeScript everywhere.** The brief requires MongoDB, Express, React and Node. Strict TypeScript across all packages; no other runtime or language.
+1. **MERN in plain JavaScript with JSDoc types.** The project is MongoDB, Express, React and Node written in JavaScript (ES2023 modules, `.js`/`.jsx`). Types are expressed as JSDoc (`@typedef`, `@param`, `@import`) and verified by `tsc --checkJs` in `npm run typecheck`; there are no TypeScript source files. The code base was first written in TypeScript and converted mechanically, with all tests re-run afterwards.
 2. **Modular monolith, pure engine packages.** One deployable API. The engine has no Express or Mongoose imports, so it is unit-testable and reused by the browser playground and the CLI.
-3. **npm workspaces, packages export TypeScript source.** Vite and Vitest compile workspace sources directly; the API is bundled with tsup (workspace code inlined, third-party dependencies external). Avoids a separate package build step.
+3. **npm workspaces, no build step for Node code.** Packages export their JavaScript source directly; the API and CLI run with plain `node` (`node --watch` in development). Only the React app has a build (Vite).
 4. **Node 22 LTS in CI and the Render blueprint.** The brief names Node 24; the code has no 24-only APIs and `engines` is `>=22.12`. Node 22 is what was available and verified locally; Node 24 can be selected by changing `NODE_VERSION`.
 5. **Own JSON parser, `yaml` for YAML.** Source positions for every JSON pointer, duplicate-key rejection and depth/node limits are needed for diagnostics and safety; `JSON.parse` provides none of these.
 6. **graphql-js as parser and safety net, own coordinate-level differ.** graphql-js `findBreakingChanges` descriptions are strings; an own walker gives structured before/after values and source locations. Any graphql-js breaking or dangerous change not matched by a JKY rule is surfaced as `GQL_UPSTREAM_UNMATCHED` so nothing is silently dropped.
