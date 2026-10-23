@@ -1,7 +1,7 @@
 [
   {
     "id": "openapi-ecommerce",
-    "name": "ShopWave Commerce API v1.4 → v2.0",
+    "name": "ShopWave Commerce API v1.4 \u2192 v2.0",
     "protocol": "openapi",
     "baseline": "openapi/breaking/ecommerce-v1.yaml",
     "candidate": "openapi/breaking/ecommerce-v2.yaml",
@@ -19,12 +19,16 @@
         "HTTP_OPERATION_ADDED",
         "HTTP_DOCS_CHANGED"
       ],
-      "exclude": ["HTTP_SECURITY_ADDED", "REQ_PROPERTY_REMOVED", "SCHEMA_COMBINATOR_CHANGED"]
+      "exclude": [
+        "HTTP_SECURITY_ADDED",
+        "REQ_PROPERTY_REMOVED",
+        "SCHEMA_COMBINATOR_CHANGED"
+      ]
     }
   },
   {
     "id": "openapi-uncertain",
-    "name": "PetCatalog OAS 3.0 → 3.1 (nullability, oneOf, circular refs)",
+    "name": "PetCatalog OAS 3.0 \u2192 3.1 (nullability, oneOf, circular refs)",
     "protocol": "openapi",
     "baseline": "openapi/uncertain/catalog-v1.yaml",
     "candidate": "openapi/uncertain/catalog-v2.yaml",
@@ -32,8 +36,15 @@
     "expect": {
       "gate": "inconclusive",
       "coverage": "partial",
-      "include": ["SCHEMA_COMBINATOR_CHANGED"],
-      "exclude": ["RES_NULL_ADDED", "REQ_NULL_REMOVED", "RES_TYPE_CHANGED", "SCHEMA_DEPTH_LIMIT"]
+      "include": [
+        "SCHEMA_COMBINATOR_CHANGED"
+      ],
+      "exclude": [
+        "RES_NULL_ADDED",
+        "REQ_NULL_REMOVED",
+        "RES_TYPE_CHANGED",
+        "SCHEMA_DEPTH_LIMIT"
+      ]
     }
   },
   {
@@ -46,8 +57,18 @@
     "expect": {
       "gate": "pass",
       "coverage": "full",
-      "include": ["HTTP_OPERATION_ADDED", "HTTP_PARAM_OPTIONAL_ADDED", "RES_PROPERTY_ADDED", "REQ_CONSTRAINT_RELAXED", "RES_PROPERTY_BECAME_REQUIRED"],
-      "exclude": ["HTTP_OPERATION_REMOVED", "REQ_CONSTRAINT_TIGHTENED", "RES_PROPERTY_REMOVED"]
+      "include": [
+        "HTTP_OPERATION_ADDED",
+        "HTTP_PARAM_OPTIONAL_ADDED",
+        "RES_PROPERTY_ADDED",
+        "REQ_CONSTRAINT_RELAXED",
+        "RES_PROPERTY_BECAME_REQUIRED"
+      ],
+      "exclude": [
+        "HTTP_OPERATION_REMOVED",
+        "REQ_CONSTRAINT_TIGHTENED",
+        "RES_PROPERTY_REMOVED"
+      ]
     }
   },
   {
@@ -60,8 +81,17 @@
     "expect": {
       "gate": "block",
       "coverage": "full",
-      "include": ["GQL_FIELD_REMOVED", "GQL_REQUIRED_ARG_ADDED", "GQL_ENUM_VALUE_REMOVED", "GQL_FIELD_ADDED", "GQL_FIELD_DEPRECATED"],
-      "exclude": ["GQL_UPSTREAM_UNMATCHED", "GQL_TYPE_REMOVED"]
+      "include": [
+        "GQL_FIELD_REMOVED",
+        "GQL_REQUIRED_ARG_ADDED",
+        "GQL_ENUM_VALUE_REMOVED",
+        "GQL_FIELD_ADDED",
+        "GQL_FIELD_DEPRECATED"
+      ],
+      "exclude": [
+        "GQL_UPSTREAM_UNMATCHED",
+        "GQL_TYPE_REMOVED"
+      ]
     }
   },
   {
@@ -74,23 +104,39 @@
     "expect": {
       "gate": "warn",
       "coverage": "partial",
-      "include": ["POSTMAN_REQUEST_METHOD_CHANGED", "POSTMAN_REQUEST_REMOVED", "POSTMAN_VARIABLE_RENAMED"],
-      "exclude": ["HTTP_OPERATION_REMOVED"]
+      "include": [
+        "POSTMAN_REQUEST_METHOD_CHANGED",
+        "POSTMAN_REQUEST_REMOVED",
+        "POSTMAN_VARIABLE_RENAMED"
+      ],
+      "exclude": [
+        "HTTP_OPERATION_REMOVED"
+      ]
     }
   },
   {
     "id": "swagger2-cross",
-    "name": "Petstore Swagger 2.0 → equivalent OpenAPI 3.0 (cross-format)",
+    "name": "Petstore Swagger 2.0 \u2192 equivalent OpenAPI 3.0 (cross-format)",
     "protocol": "openapi",
     "baseline": "swagger2/petstore-swagger2.yaml",
     "candidate": "swagger2/petstore-openapi3.yaml",
-    "options": { "allowCrossFormat": true },
+    "options": {
+      "allowCrossFormat": true
+    },
     "demo": false,
     "expect": {
       "gate": "warn",
       "coverage": "partial",
-      "include": ["XFMT_PROJECTION_LOSSY"],
-      "exclude": ["HTTP_OPERATION_REMOVED", "HTTP_PARAM_STYLE_CHANGED", "HTTP_REQUEST_MEDIA_TYPE_REMOVED", "HTTP_SECURITY_TIGHTENED", "REQ_TYPE_NARROWED"]
+      "include": [
+        "XFMT_PROJECTION_LOSSY"
+      ],
+      "exclude": [
+        "HTTP_OPERATION_REMOVED",
+        "HTTP_PARAM_STYLE_CHANGED",
+        "HTTP_REQUEST_MEDIA_TYPE_REMOVED",
+        "HTTP_SECURITY_TIGHTENED",
+        "REQ_TYPE_NARROWED"
+      ]
     }
   },
   {
@@ -99,13 +145,21 @@
     "protocol": "json-schema",
     "baseline": "json-schema/user-profile-v1.json",
     "candidate": "json-schema/user-profile-v2.json",
-    "options": { "jsonSchemaPolarity": "request" },
+    "options": {
+      "jsonSchemaPolarity": "request"
+    },
     "demo": false,
     "expect": {
       "gate": "block",
       "coverage": "full",
-      "include": ["REQ_PROPERTY_REQUIRED_ADDED", "REQ_CONSTRAINT_TIGHTENED", "REQ_CONSTRAINT_RELAXED"],
-      "exclude": ["RES_PROPERTY_ADDED"]
+      "include": [
+        "REQ_PROPERTY_REQUIRED_ADDED",
+        "REQ_CONSTRAINT_TIGHTENED",
+        "REQ_CONSTRAINT_RELAXED"
+      ],
+      "exclude": [
+        "RES_PROPERTY_ADDED"
+      ]
     }
   },
   {
@@ -114,13 +168,21 @@
     "protocol": "json-schema",
     "baseline": "json-schema/user-profile-v1.json",
     "candidate": "json-schema/user-profile-v2.json",
-    "options": { "jsonSchemaPolarity": "response" },
+    "options": {
+      "jsonSchemaPolarity": "response"
+    },
     "demo": false,
     "expect": {
       "gate": "warn",
       "coverage": "full",
-      "include": ["RES_PROPERTY_ADDED", "RES_CONSTRAINT_RELAXED", "RES_CONSTRAINT_TIGHTENED"],
-      "exclude": ["REQ_PROPERTY_REQUIRED_ADDED"]
+      "include": [
+        "RES_PROPERTY_ADDED",
+        "RES_CONSTRAINT_RELAXED",
+        "RES_CONSTRAINT_TIGHTENED"
+      ],
+      "exclude": [
+        "REQ_PROPERTY_REQUIRED_ADDED"
+      ]
     }
   },
   {
@@ -129,12 +191,23 @@
     "protocol": "grpc",
     "baseline": "protobuf/orders-v1.proto",
     "candidate": "protobuf/orders-v2.proto",
-    "demo": false,
+    "demo": true,
     "expect": {
       "gate": "block",
       "coverage": "partial",
-      "include": ["PROTO_RPC_REMOVED", "PROTO_RPC_STREAMING_CHANGED", "PROTO_FIELD_NUMBER_REUSED", "PROTO_FIELD_RENAMED", "PROTO_FIELD_WIRE_TYPE_CHANGED", "PROTO_FIELD_TYPE_CHANGED_COMPATIBLE", "PROTO_ENUM_NUMBER_REUSED", "PROTO_RPC_ADDED"],
-      "exclude": ["PROTO_PACKAGE_CHANGED"]
+      "include": [
+        "PROTO_RPC_REMOVED",
+        "PROTO_RPC_STREAMING_CHANGED",
+        "PROTO_FIELD_NUMBER_REUSED",
+        "PROTO_FIELD_RENAMED",
+        "PROTO_FIELD_WIRE_TYPE_CHANGED",
+        "PROTO_FIELD_TYPE_CHANGED_COMPATIBLE",
+        "PROTO_ENUM_NUMBER_REUSED",
+        "PROTO_RPC_ADDED"
+      ],
+      "exclude": [
+        "PROTO_PACKAGE_CHANGED"
+      ]
     }
   },
   {
@@ -147,8 +220,15 @@
     "expect": {
       "gate": "block",
       "coverage": "partial",
-      "include": ["ASYNC_CHANNEL_REMOVED", "RES_PROPERTY_BECAME_OPTIONAL", "REQ_PROPERTY_REQUIRED_ADDED", "RES_PROPERTY_ADDED"],
-      "exclude": ["ASYNC_OPERATION_REMOVED"]
+      "include": [
+        "ASYNC_CHANNEL_REMOVED",
+        "RES_PROPERTY_BECAME_OPTIONAL",
+        "REQ_PROPERTY_REQUIRED_ADDED",
+        "RES_PROPERTY_ADDED"
+      ],
+      "exclude": [
+        "ASYNC_OPERATION_REMOVED"
+      ]
     }
   },
   {
@@ -161,8 +241,13 @@
     "expect": {
       "gate": "block",
       "coverage": "partial",
-      "include": ["REQ_PROPERTY_REQUIRED_ADDED", "SCHEMA_FORMAT_CHANGED"],
-      "exclude": ["HTTP_OPERATION_REMOVED"]
+      "include": [
+        "REQ_PROPERTY_REQUIRED_ADDED",
+        "SCHEMA_FORMAT_CHANGED"
+      ],
+      "exclude": [
+        "HTTP_OPERATION_REMOVED"
+      ]
     }
   }
 ]
