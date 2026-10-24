@@ -35,6 +35,7 @@ import { api } from '@/lib/api';
 import { useInvalidate, useNotifications } from '@/lib/queries';
 import { cn } from '@/lib/cn';
 import { ThemeToggle } from './theme-toggle';
+import { CommandPalette } from './command-palette';
 import { CrumbProvider, useCrumbList, useCurrentWorkspace, WorkspaceProvider } from './workspace';
 
 /** @import { WorkspaceDTO } from '@jky/shared' */
@@ -318,6 +319,7 @@ function Shell() {
           </Button>
           <Breadcrumbs />
           <div className="ml-auto flex items-center gap-1.5">
+            <CommandPalette />
             <Link
               to="/app/notifications"
               className="relative rounded-md p-2 text-fg-soft hover:bg-raised hover:text-fg"

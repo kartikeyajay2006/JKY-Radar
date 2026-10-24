@@ -22,6 +22,7 @@ async function register(page, mail) {
 test.describe.serial('core journey', () => {
   /** @type {Page} */
   let page;
+  let projectUrl = '';
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
   });
@@ -49,6 +50,7 @@ test.describe.serial('core journey', () => {
     await page.getByLabel('Name').fill('Checkout API');
     await page.getByRole('button', { name: 'Create project' }).click();
     await expect(page).toHaveURL(/\/versions$/);
+    projectUrl = page.url().replace(/\/versions$/, '');
   });
 
   test('invalid uploads show line-level diagnostics', async () => {
@@ -126,5 +128,41 @@ test.describe.serial('core journey', () => {
     await page.getByRole('menuitem', { name: /PDF report/ }).click();
     const file = await dl;
     expect(file.suggestedFilename()).toMatch(/^jky-radar_checkout-api_.+\.pdf$/);
+  });
+
+  test('create a CI token and gate a release from a pipeline', async () => {
+    await page.goto(projectUrl);
+    await page.getByRole('link', { name: 'CI access' }).click();
+    await page.getByRole('button', { name: 'Create token' }).first().click();
+    await page.getByLabel('Name').fill('Release pipeline');
+    await page.getByRole('dialog').getByRole('button', { name: 'Create token' }).click();
+    const secret = (await page.getByRole('dialog').locator('code').textContent()) ?? '';
+    expect(secret).toMatch(/^jkyr_/);
+    await page.getByRole('button', { name: 'Done' }).click();
+    await expect(page.getByRole('cell', { name: 'Release pipeline' })).toBeVisible();
+
+    const r = await page.request.post('/api/v1/ci/check', {
+      headers: { Authorization: `Bearer ${secret}` },
+      data: {
+        candidate: { label: 'v2.0.0-ci', content: fx('openapi/breaking/ecommerce-v2.yaml').toString() },
+        baseline: 'v1.4.0',
+      },
+    });
+    expect(r.status()).toBe(200);
+    expect((await r.json()).data.gate.decision).toBe('block');
+  });
+
+  test('jump anywhere with the command palette', async () => {
+    await page.goto('/app');
+    await page.keyboard.press('Control+k');
+    const box = page.getByRole('combobox', { name: 'Search commands' });
+    await expect(box).toBeFocused();
+    await box.fill('checkout compare');
+    await expect(page.getByRole('option', { name: /Compare versions in Checkout API/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/compare$/);
   });
 });
