@@ -86,7 +86,7 @@ export function PageHeader({ title, description, actions, children }) {
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
-        <h1 className="text-[26px] leading-tight font-semibold">{title}</h1>
+        <h1 className="display text-[28px] leading-tight font-semibold">{title}</h1>
         {description && <div className="mt-1.5 max-w-2xl text-sm text-muted">{description}</div>}
         {children}
       </div>

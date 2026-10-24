@@ -192,7 +192,7 @@ export function AnalysisView({
                 </span>
               )}
             </div>
-            <h1 className="text-2xl leading-tight font-semibold md:text-[28px]">
+            <h1 className="display text-2xl leading-tight font-semibold md:text-[30px]">
               {title ?? (
                 <>
                   {a.projectName && (

@@ -18,7 +18,7 @@ const CodePane = lazy(() => import('@/components/radar/code-pane'));
 /**
  * The hero: the real JKY-Radar engine running in the browser on two contract versions.
  * Nothing is sent to a server.
- * @param {{ onResult?: (r: AnalysisResult | null) => void }} props
+ * @param {{ onResult?: (r: AnalysisResult | null, ms?: number) => void }} props
  */
 export function Playground({ onResult }) {
   const [preset, setPreset] = useState(/** @type {PresetId | 'custom'} */ ('breaking'));
@@ -48,12 +48,9 @@ export function Playground({ onResult }) {
           onResult?.(null);
           return;
         }
-        setState({
-          status: 'ok',
-          result: out.result,
-          ms: Math.max(1, Math.round(performance.now() - start)),
-        });
-        onResult?.(out.result);
+        const ms = Math.max(1, Math.round(performance.now() - start));
+        setState({ status: 'ok', result: out.result, ms });
+        onResult?.(out.result, ms);
       } catch (e) {
         if (id === seq.current) setState({ status: 'error', message: /** @type {Error} */ (e).message });
       }

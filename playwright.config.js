@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 
 const API_PORT = 4100;
 const WEB_PORT = 5180;
+// Optional: point at a system Chrome/Chromium instead of the Playwright download.
+const EXECUTABLE = process.env.PW_CHROMIUM_PATH;
 const MONGO = process.env.MONGODB_URI_E2E ?? 'mongodb://127.0.0.1:27017/jky_radar_e2e';
 
 export default defineConfig({
@@ -11,7 +13,12 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
-  use: { baseURL: `http://localhost:${WEB_PORT}`, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
+  use: {
+    baseURL: `http://localhost:${WEB_PORT}`,
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    ...(EXECUTABLE ? { launchOptions: { executablePath: EXECUTABLE } } : {}),
+  },
   projects: [
     {
       name: 'desktop',

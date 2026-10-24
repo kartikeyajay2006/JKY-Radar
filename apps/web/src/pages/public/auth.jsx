@@ -20,7 +20,7 @@ function AuthFrame({ title, subtitle, children, footer }) {
   return (
     <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md flex-col justify-center px-4 py-12">
       <Logo className="mb-8" />
-      <h1 className="text-[28px] leading-tight font-semibold">{title}</h1>
+      <h1 className="display text-[32px] leading-tight font-semibold">{title}</h1>
       <p className="mt-2 text-sm text-muted">{subtitle}</p>
       <div className="mt-8">{children}</div>
       <p className="mt-6 text-sm text-muted">{footer}</p>

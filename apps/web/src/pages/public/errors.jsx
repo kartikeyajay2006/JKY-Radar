@@ -8,7 +8,7 @@ function Frame({ code, title, body }) {
     <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col justify-center px-4 py-16">
       <RadarMark className="size-12" animated />
       <p className="mt-8 font-mono text-sm text-muted">{code}</p>
-      <h1 className="mt-2 text-[32px] leading-tight font-semibold">{title}</h1>
+      <h1 className="display mt-2 text-[36px] leading-tight font-semibold">{title}</h1>
       <p className="mt-3 text-fg-soft">{body}</p>
       <div className="mt-8 flex gap-3">
         <Link to="/">

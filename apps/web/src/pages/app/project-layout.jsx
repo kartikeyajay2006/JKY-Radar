@@ -32,7 +32,7 @@ export default function ProjectLayout() {
     <div>
       <div className="mb-6">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-[26px] leading-tight font-semibold">{p.name}</h1>
+          <h1 className="display text-[28px] leading-tight font-semibold">{p.name}</h1>
           <ProtocolBadge protocol={p.protocol} />
         </div>
         {p.description && <p className="mt-1.5 max-w-2xl text-sm text-muted">{p.description}</p>}

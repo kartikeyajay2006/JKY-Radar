@@ -1,4 +1,5 @@
 @import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource-variable/bricolage-grotesque/standard.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
 @import 'tailwindcss';
@@ -70,6 +71,7 @@
 
 @theme inline {
   --font-sans: 'IBM Plex Sans Variable', 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'IBM Plex Sans Variable', ui-sans-serif, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --color-bg: var(--bg);
@@ -162,6 +164,66 @@
       linear-gradient(90deg, var(--line) 1px, transparent 1px);
     background-size: 48px 48px;
   }
+}
+
+/* ------------------------------------------------------------------ landing: the scope
+   The scope band is an instrument: it stays dark in both themes, like a physical display. */
+.scope-band {
+  --scope-ink: #071430;
+  --scope-ink-2: #0b1d42;
+  --scope-grid: #1a3563;
+  --scope-grid-soft: rgba(124, 245, 208, 0.08);
+  --scope-phosphor: #7cf5d0;
+  --scope-text: #e8eefb;
+  --scope-text-soft: #b4c2de;
+  --scope-muted: #8ea0c4;
+  --scope-breaking: #ff6b78;
+  --scope-potential: #ffb547;
+  --scope-review: #b7a8ff;
+  --scope-safe: #5fe0a9;
+  color: var(--scope-text);
+  background:
+    radial-gradient(ellipse 70% 90% at 72% 50%, var(--scope-ink-2), transparent 70%), var(--scope-ink);
+  color-scheme: dark;
+}
+.scope-band ::selection {
+  background: rgba(124, 245, 208, 0.25);
+}
+.scope-band :focus-visible {
+  outline-color: var(--scope-phosphor);
+}
+.display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.03em;
+}
+.display-hero {
+  font-family: var(--font-display);
+  font-stretch: 84%;
+  font-weight: 650;
+  font-variation-settings: 'opsz' 96;
+  letter-spacing: -0.012em;
+  line-height: 0.94;
+}
+.scope-btn-primary {
+  background: var(--scope-phosphor);
+  color: #04122a;
+}
+.scope-btn-primary:hover {
+  background: #a5fbe2;
+}
+.scope-btn-secondary {
+  border: 1px solid var(--scope-grid);
+  color: var(--scope-text);
+}
+.scope-btn-secondary:hover {
+  border-color: var(--scope-muted);
+  background: rgba(255, 255, 255, 0.04);
+}
+.signal-path {
+  background-image: linear-gradient(90deg, var(--accent) 0 50%, transparent 50% 100%);
+  background-size: 10px 2px;
+  background-repeat: repeat-x;
 }
 
 /* CodeMirror theming hooks */

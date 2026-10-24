@@ -14,7 +14,7 @@ export function DemoIndex() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
       <div className="max-w-3xl">
-        <h1 className="text-[36px] leading-tight font-semibold">Public demo analyses</h1>
+        <h1 className="display text-[40px] leading-tight font-semibold">Public demo analyses</h1>
         <p className="mt-3 text-fg-soft">
           Each analysis below was produced by running the JKY-Radar engine on synthetic contract pairs when
           the server started. Nothing is precomputed by hand. They are read-only; create a workspace to
