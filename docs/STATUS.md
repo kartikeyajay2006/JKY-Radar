@@ -67,7 +67,7 @@ Run locally on Node 22.22, npm 11, MongoDB 7 (Docker), Chromium 156 (Playwright 
 | `npm run docs:matrix`               | 157 rules, 15 fixture pairs, no drift                                                                                                                                                                                                                         |
 | `npm audit --omit=dev`              | 0 vulnerabilities                                                                                                                                                                                                                                             |
 | `docker build -t jky-radar .` + run | health OK, SPA served, demo seeded through the compiled worker                                                                                                                                                                                                |
-| GitHub Actions CI                   | green on `main` (run 39899073608: verify job incl. Playwright, and dependency audit)                                                                                                                                                                          |
+| GitHub Actions CI                   | green on `main` (run 40096937827: verify job incl. Playwright, and dependency audit)                                                                                                                                                                          |
 
 ## Risks
 
