@@ -15,7 +15,7 @@ Vendor-neutral API contract compatibility analysis. Compare two versions of an A
 
 </div>
 
-![Landing page with the live radar console](docs/screenshots/landing-dark.png)
+![Landing page with the live radar scope](docs/screenshots/landing-dark.png)
 
 ## What it does
 
