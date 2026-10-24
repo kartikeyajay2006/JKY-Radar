@@ -154,6 +154,8 @@ test.describe.serial('core journey', () => {
 
   test('jump anywhere with the command palette', async () => {
     await page.goto('/app');
+    // Wait for the app shell (which owns the shortcut) before pressing it.
+    await expect(page.getByRole('button', { name: /^Search \(/ })).toBeVisible();
     await page.keyboard.press('Control+k');
     const box = page.getByRole('combobox', { name: 'Search commands' });
     await expect(box).toBeFocused();
