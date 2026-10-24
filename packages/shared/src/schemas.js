@@ -65,6 +65,25 @@ export const createAnalysisSchema = z.object({
   options: analysisOptionsSchema.optional().default({}),
 });
 
+/* ------------------------------------------------------------ CI tokens */
+export const API_TOKEN_PREFIX = 'jkyr_';
+export const createTokenSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  expiresInDays: z.number().int().min(1).max(365).default(90),
+});
+
+/** Body of POST /ci/check: upload the candidate and compare it with a baseline in one call. */
+export const ciCheckSchema = z
+  .object({
+    candidate: createVersionSchema.omit({ protocol: true }),
+    /** Version id or label to compare against. Defaults to the newest version uploaded before this one. */
+    baseline: z.string().trim().min(1).max(60).optional(),
+    options: analysisOptionsSchema.optional().default({}),
+    /** Seconds to wait for the verdict before answering 202 with a poll URL. */
+    wait: z.number().int().min(0).max(120).default(60),
+  })
+  .strict();
+
 export const findingsQuery = z.object({
   page: z.coerce.number().int().min(1).max(10_000).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(50),
@@ -145,6 +164,8 @@ export const paginationQuery = z.object({
 /** @typedef {z.infer<typeof createVersionSchema>} CreateVersionInput */
 /** @typedef {z.input<typeof createAnalysisSchema>} CreateAnalysisInput */
 /** @typedef {z.input<typeof findingsQuery>} FindingsQuery */
+/** @typedef {z.input<typeof createTokenSchema>} CreateTokenInput */
+/** @typedef {z.input<typeof ciCheckSchema>} CiCheckInput */
 /** @typedef {z.input<typeof createConsumerSchema>} CreateConsumerInput */
 /** @typedef {z.input<typeof addDependencySchema>} AddDependencyInput */
 /** @typedef {z.infer<typeof updatePolicySchema>} UpdatePolicyInput */

@@ -25,6 +25,7 @@ export const PERMISSIONS = /** @satisfies {Record<string, Role>} */ (
     'analysis.create': 'MAINTAINER',
     'consumer.manage': 'MAINTAINER',
     'policy.update': 'ADMIN',
+    'token.manage': 'ADMIN',
     'review.create': 'REVIEWER',
     'audit.read': 'ADMIN',
   })

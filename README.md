@@ -83,6 +83,16 @@ npm run radar -- capabilities
 
 Exit code 1 means the gate failed, 2 means an input could not be parsed. See [examples/github-actions-radar-check.yml](examples/github-actions-radar-check.yml) for gating pull requests.
 
+### Gate releases through the server
+
+Create a token under **Project → CI access**, store it as a CI secret, and send each candidate to the server. The analysis lands in the web app with its findings, impact and reviews, and the exit code follows the project's release policy:
+
+```bash
+JKY_RADAR_TOKEN=jkyr_… npm run radar -- check openapi.yaml --server https://radar.example.com --label "$GIT_SHA"
+```
+
+Without the CLI, `POST /api/v1/ci/check` does the same from any CI (see [docs/API.md](docs/API.md#ci-tokens)).
+
 ## Scripts
 
 | Command                                                       | What it does                                                   |
@@ -91,7 +101,7 @@ Exit code 1 means the gate failed, 2 means an input could not be parsed. See [ex
 | `npm run build`                                               | Production build of the web app (the API runs from source)     |
 | `npm start`                                                   | Start the built API (serves the web app when `SERVE_WEB=true`) |
 | `npm run typecheck` / `npm run lint` / `npm run format:check` | JSDoc type check, ESLint, Prettier                             |
-| `npm test`                                                    | 450 unit, integration and security tests (needs MongoDB)       |
+| `npm test`                                                    | 494 unit, integration and security tests (needs MongoDB)       |
 | `npm run test:e2e`                                            | Playwright journey, mobile and accessibility tests             |
 | `npm run seed:demo`                                           | Idempotent public demo seed                                    |
 | `npm run docs:matrix`                                         | Regenerate the support matrix and rule catalog from code       |

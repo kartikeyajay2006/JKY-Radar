@@ -21,6 +21,7 @@ import { consumersRouter } from './modules/consumers.js';
 import { notificationsRouter } from './modules/notifications.js';
 import { metaRouter } from './modules/meta.js';
 import { demoRouter } from './modules/demo.js';
+import { ciRouter, tokensRouter } from './modules/tokens.js';
 import { AnalysisRunner } from './services/analysis-runner.js';
 
 /**
@@ -33,7 +34,7 @@ import { AnalysisRunner } from './services/analysis-runner.js';
  * @param {Env} env
  * @param {number} windowMs
  * @param {number} limit
- * @param {'ip' | 'user'} [key]
+ * @param {'ip' | 'user' | 'token'} [key]
  * @returns {RequestHandler}
  */
 const limiter = (env, windowMs, limit, key = 'ip') => {
@@ -46,7 +47,9 @@ const limiter = (env, windowMs, limit, key = 'ip') => {
     keyGenerator:
       key === 'user'
         ? (req) => /** @type {AppRequest} */ (req).auth?.userId?.toString() ?? req.ip ?? 'anon'
-        : undefined,
+        : key === 'token'
+          ? (req) => /** @type {any} */ (req).ci?.token?._id?.toString() ?? req.ip ?? 'anon'
+          : undefined,
     handler: (req, res) => {
       res.status(429).json({
         error: {
@@ -127,7 +130,10 @@ export function createApp({ env, runner = new AnalysisRunner(env) }) {
   api.use(analysesRouter());
   api.use(consumersRouter());
   api.use(notificationsRouter());
+  api.use(tokensRouter());
 
+  // CI routes authenticate with bearer tokens only, so they sit before the cookie session and CSRF checks.
+  app.use('/api/v1/ci', ciRouter(env, runner, limiter(env, 60_000, 30, 'token')));
   app.use('/api/v1', api);
   app.use('/api', notFoundHandler);
 

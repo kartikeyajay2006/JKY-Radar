@@ -433,3 +433,49 @@ export const useUpdatePolicy = (pid) => {
     onSuccess: () => inv(['policy', pid]),
   });
 };
+
+/* ----------------------------------------------------------- CI tokens */
+/** @typedef {import('@jky/shared').ApiTokenDTO} ApiTokenDTO */
+
+/** @param {string} [pid] */
+export const useTokens = (pid) =>
+  useQuery({
+    queryKey: ['tokens', pid],
+    queryFn: async () =>
+      (
+        await /** @type {Promise<import('@/lib/api').Envelope<ApiTokenDTO[]>>} */ (
+          api.get(`/projects/${pid}/tokens`)
+        )
+      ).data,
+    enabled: !!pid,
+  });
+
+/** @param {string} [pid] */
+export const useCreateToken = (pid) => {
+  const inv = useInvalidate();
+  return useMutation({
+    /** @param {{ name: string; expiresInDays: number }} b */
+    mutationFn: async (b) =>
+      (
+        await /** @type {Promise<import('@/lib/api').Envelope<{ token: ApiTokenDTO; secret: string }>>} */ (
+          api.post(`/projects/${pid}/tokens`, b)
+        )
+      ).data,
+    onSuccess: () => inv(['tokens', pid]),
+  });
+};
+
+/** @param {string} [pid] */
+export const useRevokeToken = (pid) => {
+  const inv = useInvalidate();
+  return useMutation({
+    /** @param {string} tid */
+    mutationFn: async (tid) =>
+      (
+        await /** @type {Promise<import('@/lib/api').Envelope<ApiTokenDTO>>} */ (
+          api.del(`/projects/${pid}/tokens/${tid}`)
+        )
+      ).data,
+    onSuccess: () => inv(['tokens', pid]),
+  });
+};

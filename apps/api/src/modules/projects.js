@@ -1,12 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import {
-  canonicalJson,
-  ENGINE_VERSION,
-  RULE_REGISTRY_VERSION,
-  normalizeDependencyKey,
-} from '@jky/radar-core';
-import { ADAPTER_VERSION } from '@jky/radar-adapters';
+import { normalizeDependencyKey } from '@jky/radar-core';
 import {
   createAnalysisSchema,
   createConsumerSchema,
@@ -20,11 +14,11 @@ import {
 import { Analysis, Consumer, ConsumerDependency, Policy, SpecFile, SpecVersion } from '../models/index.js';
 import { asyncHandler, parse, sendData } from '../lib/http.js';
 import { AppError, badRequest, conflict, notFound, quotaExceeded } from '../lib/errors.js';
-import { sha256 } from '../lib/crypto.js';
 import { loadProject, loadVersion } from '../services/access.js';
 import { audit } from '../services/audit.js';
 import { createVersion } from '../services/versions.js';
-import { currentPolicy, ensurePolicy, releasePolicyVersion, toReleasePolicy } from '../services/policies.js';
+import { requestAnalysis } from '../services/analyses.js';
+import { currentPolicy, ensurePolicy } from '../services/policies.js';
 import {
   analysisDTO,
   analysisSummaryDTO,
@@ -224,62 +218,17 @@ export function projectsRouter(env, runner, limiters) {
         SpecVersion.findOne({ _id: input.candidateId, projectId: project._id }).lean(),
       ]);
       if (!bv || !cv) throw notFound('Version in this project');
-      if (bv.protocol !== cv.protocol && !input.options.allowCrossFormat) {
-        throw new AppError(
-          422,
-          'PROTOCOL_MISMATCH',
-          `Baseline is ${bv.protocol} and candidate is ${cv.protocol}. Enable cross-format comparison to compare them.`,
-        );
-      }
-      const policy = await ensurePolicy(project.workspaceId, project._id, access.userId);
-      const options = { includeInformational: true, ...input.options };
-      const inputHash = sha256(
-        canonicalJson({
-          b: bv.rawHash,
-          c: cv.rawHash,
-          engine: ENGINE_VERSION,
-          rules: RULE_REGISTRY_VERSION,
-          adapter: ADAPTER_VERSION,
-          policy: releasePolicyVersion(policy),
-          options,
-        }),
-      );
-      const existing = await Analysis.findOne({ projectId: project._id, inputHash });
-      if (existing && existing.state !== 'failed') {
-        const names = await userNames([existing.createdBy]);
-        return void sendData(res, { ...analysisDTO(existing.toObject(), bv, cv, names), cached: true }, 200);
-      }
-      if (existing) await existing.deleteOne();
-      const analysis = await Analysis.create({
-        workspaceId: project.workspaceId,
-        projectId: project._id,
-        baselineId: bv._id,
-        candidateId: cv._id,
-        protocol: cv.protocol,
-        inputHash,
-        options,
-        policyId: policy._id,
-        policyRevision: policy.revision,
-        policyName: policy.name,
-        policySnapshot: toReleasePolicy(policy),
-        createdBy: access.userId,
-        timings: { queuedAt: new Date() },
+      const { analysis, cached } = await requestAnalysis(req, runner, {
+        project,
+        baseline: bv,
+        candidate: cv,
+        options: input.options,
+        actorId: access.userId,
       });
-      await audit(req, {
-        workspaceId: access.workspaceId,
-        action: 'analysis.requested',
-        resourceType: 'analysis',
-        resourceId: analysis._id,
-        metadata: {
-          baseline: bv.label,
-          candidate: cv.label,
-          policyRevision: policy.revision,
-          ...(options.operationAliases && Object.keys(options.operationAliases).length
-            ? { operationAliases: options.operationAliases }
-            : {}),
-        },
-      });
-      runner.enqueue(analysis._id.toString());
+      if (cached) {
+        const names = await userNames([analysis.createdBy]);
+        return void sendData(res, { ...analysisDTO(analysis.toObject(), bv, cv, names), cached: true }, 200);
+      }
       const names = await userNames([access.userId]);
       sendData(res, analysisDTO(analysis.toObject(), bv, cv, names), 202);
     }),

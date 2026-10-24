@@ -360,6 +360,27 @@ auditSchema.index({ workspaceId: 1, createdAt: -1 });
 immutable(auditSchema, 'Audit event');
 export const AuditEvent = model('AuditEvent', auditSchema);
 
+/* ---------------------------------------------------------------- CI tokens */
+// Project-scoped bearer tokens for pipelines. Only the SHA-256 of the secret is stored.
+const apiTokenSchema = new Schema(
+  {
+    workspaceId: { type: ObjectId, ref: 'Workspace', required: true },
+    projectId: { type: ObjectId, ref: 'Project', required: true },
+    name: { type: String, required: true, trim: true },
+    prefix: { type: String, required: true },
+    tokenHash: { type: String, required: true, unique: true },
+    createdBy: { type: ObjectId, ref: 'User', required: true },
+    expiresAt: { type: Date, required: true },
+    lastUsedAt: Date,
+    revokedAt: Date,
+    revokedBy: { type: ObjectId, ref: 'User' },
+  },
+  opts,
+);
+apiTokenSchema.index({ projectId: 1, createdAt: -1 });
+/** @typedef {InferSchemaType<typeof apiTokenSchema> & { _id: Types.ObjectId; createdAt: Date; updatedAt: Date; }} ApiTokenDoc */
+export const ApiToken = model('ApiToken', apiTokenSchema);
+
 /** @returns {Promise<void>} */
 export async function ensureIndexes() {
   await Promise.all(
@@ -379,6 +400,7 @@ export async function ensureIndexes() {
       Review,
       Notification,
       AuditEvent,
+      ApiToken,
     ].map((m) => m.syncIndexes()),
   );
 }

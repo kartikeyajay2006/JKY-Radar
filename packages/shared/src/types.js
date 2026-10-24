@@ -208,6 +208,21 @@
  * @property {AnalysisSummaryDTO[]} recentAnalyses
  */
 
+/**
+ * A CI token as listed in the UI. The secret itself is only returned once, on creation.
+ * @typedef {Object} ApiTokenDTO
+ * @property {string} id
+ * @property {string} projectId
+ * @property {string} name
+ * @property {string} prefix
+ * @property {{ id: string; name: string } | null} createdBy
+ * @property {string} createdAt
+ * @property {string} expiresAt
+ * @property {string | null} lastUsedAt
+ * @property {string | null} revokedAt
+ * @property {'active' | 'expired' | 'revoked'} status
+ */
+
 /** @typedef {ImpactReport} ImpactDTO */
 
 export {};

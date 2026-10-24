@@ -21,6 +21,7 @@ const Versions = lazy(() => import('@/pages/app/versions'));
 const Compare = lazy(() => import('@/pages/app/compare'));
 const Consumers = lazy(() => import('@/pages/app/consumers'));
 const Policies = lazy(() => import('@/pages/app/policies'));
+const CiAccess = lazy(() => import('@/pages/app/ci-access'));
 const Analysis = lazy(() => import('@/pages/app/analysis'));
 const Activity = lazy(() => import('@/pages/app/activity'));
 const Notifications = lazy(() => import('@/pages/app/notifications'));
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
           { path: 'compare', element: s(<Compare />) },
           { path: 'consumers', element: s(<Consumers />) },
           { path: 'policies', element: s(<Policies />) },
+          { path: 'ci', element: s(<CiAccess />) },
         ],
       },
       { path: 'analyses/:aid', element: s(<Analysis />) },

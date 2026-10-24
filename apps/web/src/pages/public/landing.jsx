@@ -55,7 +55,7 @@ const SCOPE_GATE = {
 
 /** Real output of `npm run radar -- compare` on the ecommerce fixtures, trimmed. */
 const CLI_LINES = /** @type {Array<[string, string]>} */ ([
-  ['cmd', '$ npx radar compare ecommerce-v1.yaml ecommerce-v2.yaml'],
+  ['cmd', '$ npm run radar -- compare ecommerce-v1.yaml ecommerce-v2.yaml'],
   ['head', 'JKY-Radar · openapi · gate BLOCK · coverage full'],
   ['soft', '  7 breaking finding(s), policy action "block".'],
   ['blank', ''],
@@ -347,7 +347,8 @@ export default function Landing() {
             </h2>
             <p className="mt-4 text-fg-soft">
               The same engine ships as an offline CLI. Run it on every pull request and a breaking contract
-              change fails the check before anyone deploys it.
+              change fails the check before anyone deploys it. Or send the candidate to your workspace with a
+              project token, and the analysis lands next to its findings, impact and reviews.
             </p>
             <dl className="mt-6 divide-y divide-line border-y border-line text-sm">
               {[

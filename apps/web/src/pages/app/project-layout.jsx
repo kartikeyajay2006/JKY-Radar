@@ -1,6 +1,7 @@
 /** @import { ProjectDTO, Role } from '@jky/shared' */
 import { NavLink, Outlet, useParams, useOutletContext } from 'react-router';
 import { useEffect } from 'react';
+import { roleAllows } from '@jky/shared';
 
 import { ErrorState, Skeleton } from '@/components/ui/primitives';
 import { ProtocolBadge } from '@/components/radar/badges';
@@ -27,6 +28,7 @@ export default function ProjectLayout() {
     { to: 'compare', label: 'Compare' },
     { to: 'consumers', label: 'Consumers' },
     { to: 'policies', label: 'Release policy' },
+    ...(roleAllows(p.role, 'token.manage') ? [{ to: 'ci', label: 'CI access' }] : []),
   ];
   return (
     <div>

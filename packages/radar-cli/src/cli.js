@@ -3,12 +3,15 @@
  * JKY-Radar CLI — offline contract comparison with the same engine as the server.
  *   npm run radar -- compare <baseline> <candidate> [--format json|md|text] [--protocol <p>]
  *                   [--polarity request|response] [--cross-format] [--fail-on block|warn]
+ *   npm run radar -- check <candidate> [--server <url>] [--label <l>] [--baseline <id|label>]
+ *                   [--fail-on block|warn]          (needs JKY_RADAR_TOKEN; server from JKY_RADAR_URL)
  * Exit codes: 0 = gate passed (or below --fail-on), 1 = gate failed, 2 = usage/parse error.
  */
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { analyzeContracts, capabilityReport } from '@jky/radar-adapters';
 import { buildMarkdownReport, PROTOCOLS, SEVERITY_LABEL } from '@jky/radar-core';
+import { runCheck } from './check.js';
 
 /** @import { Protocol } from '@jky/radar-core' */
 
@@ -24,6 +27,9 @@ const usage = () => {
   console.error(
     'Usage: radar compare <baseline> <candidate> [--format text|json|md] [--protocol <p>] [--polarity request|response] [--cross-format] [--fail-on block|warn]',
   );
+  console.error(
+    '       radar check <candidate> [--server <url>] [--label <label>] [--baseline <id|label>] [--fail-on block|warn]',
+  );
   console.error('       radar capabilities');
   process.exit(2);
 };
@@ -35,6 +41,22 @@ if (command === 'capabilities') {
       `${c.status.padEnd(13)} ${c.label} (${c.versions}) — rules ${c.rules.tested}/${c.rules.registered}`,
     );
   process.exit(0);
+}
+if (command === 'check') {
+  const file = rest.find((a, i) => !a.startsWith('--') && !(i > 0 && rest[i - 1].startsWith('--')));
+  const server = flag('server') ?? process.env.JKY_RADAR_URL;
+  if (!file || !server) usage();
+  const fail = flag('fail-on');
+  process.exit(
+    await runCheck({
+      server: /** @type {string} */ (server),
+      token: process.env.JKY_RADAR_TOKEN ?? '',
+      file: /** @type {string} */ (file),
+      ...(flag('label') ? { label: flag('label') } : {}),
+      ...(flag('baseline') ? { baseline: flag('baseline') } : {}),
+      ...(fail === 'warn' || fail === 'block' ? { failOn: fail } : {}),
+    }),
+  );
 }
 if (command !== 'compare') usage();
 const positional = rest.filter(

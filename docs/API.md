@@ -2,7 +2,7 @@
 
 Base path `/api/v1`. JSON in and out. Successful responses: `{ "data": ..., "meta"?: ... }`. Errors: `{ "error": { "code", "message", "details"?, "requestId" } }` with conventional status codes (400, 401, 403, 404, 409, 413, 415, 422, 429, 500).
 
-**Authentication:** opaque session cookie `jky_sid` (HttpOnly, SameSite=Lax, Secure in production) set by register/login.
+**Authentication:** opaque session cookie `jky_sid` (HttpOnly, SameSite=Lax, Secure in production) set by register/login. The `/ci/*` routes use a project CI token instead (see below).
 **CSRF:** every `POST/PUT/PATCH/DELETE` needs the `X-CSRF-Token` header equal to the `jky_csrf` cookie. Get a token from `GET /auth/csrf`, `GET /auth/session` or the register/login response. Cross-origin `Origin` headers are rejected.
 **Authorisation:** resources are resolved through their stored workspace and the caller's membership. Non-members receive 404; members without the required role receive 403.
 **Caching:** private responses are `Cache-Control: no-store`; only `/demo/*`, `/capabilities` and `/rules` are cacheable.
@@ -78,6 +78,25 @@ Analysis options: `jsonSchemaPolarity` (`request` or `response`), `allowCrossFor
 | GET           | `/projects/:pid/policy`             | VIEWER (`{ current, history }`)                          |
 | PUT           | `/projects/:pid/policy`             | ADMIN (creates a new revision)                           |
 
+## CI tokens
+
+Project-scoped tokens let a pipeline upload a candidate and read the release gate. Admins manage them in the web app under **Project → CI access**, or with these session routes:
+
+| Method | Path                         | Min role | Notes                                                                                          |
+| ------ | ---------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/projects/:pid/tokens`      | ADMIN    | Lists tokens with `prefix`, `status` (`active`, `expired`, `revoked`), `lastUsedAt`            |
+| POST   | `/projects/:pid/tokens`      | ADMIN    | `{ name, expiresInDays? (1–365, default 90) }` → `{ token, secret }`; the secret is shown once |
+| DELETE | `/projects/:pid/tokens/:tid` | ADMIN    | Revokes immediately                                                                            |
+
+Pipeline routes authenticate with `Authorization: Bearer jkyr_…`. They ignore cookies and need no CSRF token. A token acts with its creator's permissions, which are checked on every call: if that person leaves the workspace or drops below MAINTAINER, the token returns `403 TOKEN_OWNER_LACKS_ACCESS`. Missing, unknown, expired and revoked tokens all return the same `401 INVALID_TOKEN`. Limit: 30 calls per minute per token.
+
+| Method | Path                | Notes                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/ci/check`         | `{ candidate: { label, content, fileName?, notes? }, baseline?: label or id, options?, wait? (0–120 s, default 60) }`. Uploads the candidate (identical content reuses the stored version), compares it with `baseline` or the newest earlier version, and waits for the verdict. 200 when finished, 202 with `poll` while running, 422 `NO_BASELINE` when there is nothing to compare with. |
+| GET    | `/ci/analyses/:aid` | Poll an analysis of the token's own project                                                                                                                                                                                                                                                                                                                                                  |
+
+The verdict is `{ analysisId, state, gate: { decision, reasons }, counts, coverage, baseline, candidate: { id, label, uploaded }, cached, url, poll }`. The CLI wraps this: `JKY_RADAR_TOKEN=… npm run radar -- check openapi.yaml --server https://radar.example.com`.
+
 ## Notifications
 
 | Method | Path                                         |
@@ -86,4 +105,4 @@ Analysis options: `jsonSchemaPolarity` (`request` or `response`), `allowCrossFor
 | PATCH  | `/notifications/:nid/read`                   |
 | POST   | `/notifications/read-all`                    |
 
-Rate limits: 600 requests/min per IP overall, 30 auth attempts per 15 minutes, 30 uploads and 20 analyses per minute per user.
+Rate limits: 600 requests/min per IP overall, 30 auth attempts per 15 minutes, 30 uploads and 20 analyses per minute per user, 30 CI calls per minute per token.
