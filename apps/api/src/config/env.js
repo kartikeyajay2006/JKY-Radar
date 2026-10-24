@@ -36,9 +36,9 @@ const schema = z.object({
   ANALYSIS_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120_000).default(20_000),
   ANALYSIS_ISOLATION: z.enum(['worker', 'inline']).default('worker'),
   ANALYSIS_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(2),
-  ENABLE_REMOTE_URL_IMPORT: bool.default('false'),
-  DEMO_SEED_ENABLED: bool.default('true'),
-  SERVE_WEB: bool.default('false'),
+  ENABLE_REMOTE_URL_IMPORT: bool.default(false),
+  DEMO_SEED_ENABLED: bool.default(true),
+  SERVE_WEB: bool.default(false),
   TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
   SESSION_TTL_HOURS: z.coerce
     .number()
@@ -46,7 +46,7 @@ const schema = z.object({
     .min(1)
     .max(24 * 30)
     .default(24 * 7),
-  RATE_LIMIT_ENABLED: bool.default('true'),
+  RATE_LIMIT_ENABLED: bool.default(true),
 });
 
 /** @typedef {z.infer<typeof schema>} Env */

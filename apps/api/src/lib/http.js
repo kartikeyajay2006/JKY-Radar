@@ -2,7 +2,7 @@ import { validationFailed } from './errors.js';
 
 /** @import { AppRequest } from '../types.js' */
 /** @import { NextFunction, RequestHandler, Response } from 'express' */
-/** @import { ZodType, ZodTypeDef } from 'zod' */
+/** @import { ZodType } from 'zod' */
 
 /** Wraps an async route handler so rejected promises reach the error middleware. */
 export const asyncHandler =
@@ -16,7 +16,7 @@ export const asyncHandler =
 
 /**
  * @template T
- * @param {ZodType<T, ZodTypeDef, unknown>} schema
+ * @param {ZodType<T>} schema
  * @param {unknown} value
  * @returns {T}
  */
