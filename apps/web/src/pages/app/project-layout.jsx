@@ -1,5 +1,5 @@
 /** @import { ProjectDTO, Role } from '@jky/shared' */
-import { NavLink, Outlet, useParams, useOutletContext } from 'react-router';
+import { NavLink, Outlet, useLocation, useParams, useOutletContext } from 'react-router';
 import { useEffect } from 'react';
 import { roleAllows } from '@jky/shared';
 
@@ -14,6 +14,7 @@ export const useProjectCtx = () => /** @type {ProjectCtx} */ (useOutletContext()
 
 export default function ProjectLayout() {
   const { pid } = useParams();
+  const { pathname } = useLocation();
   const q = useProject(pid);
   const { setCurrent, current } = useCurrentWorkspace();
   useEffect(() => {
@@ -58,7 +59,9 @@ export default function ProjectLayout() {
           ))}
         </nav>
       </div>
-      <Outlet context={/** @satisfies {ProjectCtx} */ ({ project: p })} />
+      <div key={pathname} className="page-in">
+        <Outlet context={/** @satisfies {ProjectCtx} */ ({ project: p })} />
+      </div>
     </div>
   );
 }

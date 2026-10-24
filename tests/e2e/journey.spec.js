@@ -14,7 +14,7 @@ async function register(page, mail) {
   await page.goto('/register');
   await page.getByLabel('Your name').fill('Erin Engineer');
   await page.getByLabel('Work email').fill(mail);
-  await page.getByLabel('Password').fill('correct-horse-42');
+  await page.getByLabel('Password', { exact: true }).fill('correct-horse-42');
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page).toHaveURL(/\/app$/);
 }

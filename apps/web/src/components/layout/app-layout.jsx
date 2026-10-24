@@ -276,6 +276,7 @@ function UserMenu() {
 
 function Shell() {
   const [mobile, setMobile] = useState(false);
+  const { pathname } = useLocation();
   const notes = useNotifications();
   const unread = notes.data?.meta?.unread ?? 0;
   return (
@@ -333,7 +334,10 @@ function Shell() {
           </div>
         </header>
         <main id="app-main" className="mx-auto max-w-[1360px] px-4 py-6 sm:px-6 lg:py-8">
-          <Outlet />
+          {/* Project tabs animate inside the project layout, so its header stays put. */}
+          <div key={pathname.replace(/^(\/app\/projects\/[^/]+).*/, '$1')} className="page-in">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

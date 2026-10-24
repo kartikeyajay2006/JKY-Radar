@@ -35,7 +35,7 @@ export function DemoIndex() {
           <Link
             key={d.id}
             to={`/demo/${d.id}`}
-            className="panel group flex flex-col gap-4 p-5 transition-colors hover:border-line-strong"
+            className="panel lift group flex flex-col gap-4 p-5 hover:border-line-strong"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">

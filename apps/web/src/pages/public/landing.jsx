@@ -312,7 +312,7 @@ export default function Landing() {
                   <Link
                     key={d.id}
                     to={`/demo/${d.id}`}
-                    className="panel flex items-center gap-4 p-4 transition-colors hover:border-line-strong"
+                    className="panel lift flex items-center gap-4 p-4 hover:border-line-strong"
                   >
                     <Users className="size-5 shrink-0 text-muted" />
                     <span className="min-w-0 flex-1">

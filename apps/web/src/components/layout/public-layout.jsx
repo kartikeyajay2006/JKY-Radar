@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router';
-import { Menu as MenuIcon, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation } from 'react-router';
+import { Github, Menu as MenuIcon, X } from 'lucide-react';
 import { Logo } from '@/components/radar/logo';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth';
@@ -17,6 +17,15 @@ const links = [
 export function PublicLayout() {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 8);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+  useEffect(() => setOpen(false), [pathname]);
   return (
     <div className="flex min-h-screen flex-col">
       <a
@@ -25,7 +34,12 @@ export function PublicLayout() {
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
+      <header
+        className={cn(
+          'sticky top-0 z-40 border-b bg-bg/80 backdrop-blur-md transition-[border-color,box-shadow] duration-300',
+          scrolled ? 'border-line shadow-[0_8px_24px_-16px_rgba(0,0,0,0.45)]' : 'border-transparent',
+        )}
+      >
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4 sm:px-6">
           <Link to="/" aria-label="JKY-Radar home">
             <Logo />
@@ -35,12 +49,16 @@ export function PublicLayout() {
               <NavLink
                 key={l.to}
                 to={l.to}
-                className={({ isActive }) =>
-                  cn(
-                    'rounded-md px-3 py-1.5 text-sm text-fg-soft hover:text-fg',
-                    isActive && l.to === '/demo' && 'text-fg',
-                  )
-                }
+                className={({ isActive }) => {
+                  const active =
+                    isActive && !l.to.includes('#') && (l.to !== '/docs' || pathname === '/docs');
+                  return cn(
+                    'relative rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-raised hover:text-fg',
+                    active ? 'text-fg' : 'text-fg-soft',
+                    active &&
+                      'after:absolute after:inset-x-3 after:-bottom-[11px] after:h-0.5 after:rounded-full after:bg-accent',
+                  );
+                }}
               >
                 {l.label}
               </NavLink>
@@ -79,7 +97,7 @@ export function PublicLayout() {
           </div>
         </div>
         {open && (
-          <nav className="border-t border-line px-4 py-3 md:hidden" aria-label="Mobile">
+          <nav className="menu-in border-t border-line px-4 py-3 md:hidden" aria-label="Mobile">
             {[
               ...links,
               ...(user
@@ -102,13 +120,23 @@ export function PublicLayout() {
         )}
       </header>
       <main id="main" className="flex-1">
-        <Outlet />
+        <div key={pathname} className="page-in">
+          <Outlet />
+        </div>
       </main>
       <footer className="border-t border-line">
         <div className="mx-auto grid grid-cols-1 max-w-7xl gap-8 px-4 py-10 text-sm sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="space-y-3">
             <Logo />
             <p className="max-w-xs text-muted">One Radar. Every API. Know what breaks before you ship.</p>
+            <a
+              href="https://github.com/kartikeyajay2006/JKY-Radar"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border border-line px-2.5 py-1.5 text-xs text-fg-soft transition-colors hover:border-line-strong hover:text-fg"
+            >
+              <Github className="size-3.5" /> Source on GitHub
+            </a>
           </div>
           <div className="space-y-2">
             <p className="font-medium">Product</p>

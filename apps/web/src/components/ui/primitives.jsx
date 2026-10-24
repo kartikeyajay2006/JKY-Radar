@@ -7,7 +7,7 @@ import { ApiError } from '@/lib/api';
 
 /** @param {HTMLAttributes<HTMLDivElement>} props */
 export function Skeleton({ className, ...p }) {
-  return <div className={cn('animate-pulse rounded-md bg-raised', className)} aria-hidden {...p} />;
+  return <div className={cn('skeleton rounded-md', className)} aria-hidden {...p} />;
 }
 
 /** @param {{ label?: string }} props */

@@ -1,22 +1,37 @@
 import { Link, useRouteError, isRouteErrorResponse } from 'react-router';
-import { RadarMark } from '@/components/radar/logo';
+import { MiniRadar } from '@/components/radar/mini-radar';
 import { Button } from '@/components/ui/button';
 
 /** @param {{ code: string; title: string; body: string }} props */
 function Frame({ code, title, body }) {
   return (
-    <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col justify-center px-4 py-16">
-      <RadarMark className="size-12" animated />
-      <p className="mt-8 font-mono text-sm text-muted">{code}</p>
-      <h1 className="display mt-2 text-[36px] leading-tight font-semibold">{title}</h1>
-      <p className="mt-3 text-fg-soft">{body}</p>
-      <div className="mt-8 flex gap-3">
-        <Link to="/">
-          <Button variant="primary">Go to the home page</Button>
-        </Link>
-        <Link to="/app">
-          <Button variant="secondary">Open your workspace</Button>
-        </Link>
+    <div className="relative overflow-hidden">
+      <div
+        className="hairline-grid pointer-events-none absolute inset-0 opacity-25 [mask-image:radial-gradient(ellipse_at_70%_50%,black,transparent_70%)]"
+        aria-hidden
+      />
+      <div className="relative mx-auto grid min-h-[70vh] max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
+        <div className="page-in">
+          <p className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 font-mono text-xs text-muted">
+            <span className="size-1.5 rounded-full bg-breaking" />
+            {code}
+          </p>
+          <h1 className="display mt-5 text-[36px] leading-tight font-semibold sm:text-[44px]">{title}</h1>
+          <p className="mt-3 max-w-md text-fg-soft">{body}</p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/">
+              <Button variant="primary" size="lg">
+                Go to the home page
+              </Button>
+            </Link>
+            <Link to="/app">
+              <Button variant="secondary" size="lg">
+                Open your workspace
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <MiniRadar className="hidden max-w-[24rem] md:block" />
       </div>
     </div>
   );

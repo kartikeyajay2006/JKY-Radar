@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn';
 /** @type {Record<Variant, string>} */
 const variants = {
   primary:
-    'bg-accent-solid text-accent-fg hover:bg-accent-solid-hover shadow-[0_1px_0_rgba(255,255,255,0.12)_inset]',
+    'bg-accent-solid text-accent-fg hover:bg-accent-solid-hover shadow-[0_1px_0_rgba(255,255,255,0.12)_inset] hover:shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_6px_20px_-6px_var(--accent-solid)]',
   secondary: 'bg-surface text-fg border border-line hover:border-line-strong hover:bg-raised',
   ghost: 'text-fg-soft hover:bg-raised hover:text-fg',
   danger: 'bg-breaking/10 text-breaking border border-breaking/30 hover:bg-breaking/15',
@@ -49,7 +49,7 @@ export const Button =
           type={type}
           disabled={disabled || loading}
           className={cn(
-            'inline-flex shrink-0 items-center rounded-[var(--radius-control)] font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+            'inline-flex shrink-0 items-center rounded-[var(--radius-control)] font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100',
             variants[variant],
             sizes[size],
             className,

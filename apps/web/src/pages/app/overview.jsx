@@ -1,7 +1,8 @@
 /** @import { AnalysisSummaryDTO, OverviewDTO } from '@jky/shared' */
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { useMutation } from '@tanstack/react-query';
-import { Boxes, Mail } from 'lucide-react';
+import { Boxes, Check, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -80,15 +81,15 @@ function Timeline({ data }) {
         role="img"
         aria-label={`Analyses per day over the last 14 days, total ${data.reduce((n, d) => n + d.analyses, 0)}`}
       >
-        {data.map((d) => (
+        {data.map((d, i) => (
           <div
             key={d.date}
             className="group relative flex h-full flex-1 flex-col justify-end"
             title={`${d.date}: ${d.analyses} analyses, ${d.blocked} blocked`}
           >
             <div
-              className="w-full rounded-t-[3px] bg-accent/25"
-              style={{ height: `${(d.analyses / max) * 100}%` }}
+              className="grow-up w-full rounded-t-[3px] bg-accent/25 transition-colors group-hover:bg-accent/40"
+              style={{ height: `${(d.analyses / max) * 100}%`, animationDelay: `${i * 35}ms` }}
             >
               <div
                 className="w-full rounded-t-[3px] bg-breaking"
@@ -196,29 +197,121 @@ export default function OverviewPage() {
           }
         />
       ) : (
-        <Dashboard d={q.data} />
+        <Dashboard d={q.data} href={projectsHref} />
       )}
     </>
   );
 }
 
-/** @param {{ value: number | string; label: string; tone?: string }} props */
+/** Counts up to `value` once, easing out; shows the final number straight away for reduced motion. @param {number} value */
+function useCountUp(value) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || value === 0) {
+      setShown(value);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (/** @type {number} */ now) => {
+      const t = Math.min(1, (now - start) / 750);
+      setShown(Math.round(value * (1 - (1 - t) ** 3)));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return shown;
+}
+
+/** @param {{ value: number; label: string; tone?: string }} props */
 function Stat({ value, label, tone }) {
+  const shown = useCountUp(value);
   return (
-    <div className="panel p-4">
-      <div className={cn('tabular text-[28px] leading-none font-semibold', tone)}>{value}</div>
+    <div className="panel lift p-4">
+      <div className={cn('tabular text-[28px] leading-none font-semibold', tone)}>
+        <span aria-hidden>{shown}</span>
+        <span className="sr-only">{value}</span>
+      </div>
       <div className="mt-2 text-sm text-muted">{label}</div>
     </div>
   );
 }
 
-/** @param {{ d: OverviewDTO }} props */
-function Dashboard({ d }) {
+/** @param {{ d: OverviewDTO; href: string }} props */
+function GettingStarted({ d, href }) {
+  const steps = [
+    { done: d.counts.projects > 0, title: 'Create a project', body: 'One project tracks one API contract.' },
+    {
+      done: d.counts.versions >= 2,
+      title: 'Upload two versions',
+      body: 'Your released contract and the proposed one.',
+    },
+    {
+      done: d.counts.analyses > 0,
+      title: 'Run an analysis',
+      body: 'Compare them and read the release gate.',
+    },
+    {
+      done: d.counts.consumers > 0,
+      title: 'Register a consumer',
+      body: 'See which apps each change affects.',
+    },
+  ];
+  const done = steps.filter((s) => s.done).length;
+  if (done === steps.length) return null;
+  return (
+    <section className="panel overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <div>
+          <h2 className="text-[15px] font-semibold">Get started</h2>
+          <p className="text-xs text-muted">
+            {done} of {steps.length} done
+          </p>
+        </div>
+        <div className="h-1.5 w-40 overflow-hidden rounded-full bg-raised" aria-hidden>
+          <div
+            className="h-full rounded-full bg-accent transition-[width] duration-700 ease-out"
+            style={{ width: `${(done / steps.length) * 100}%` }}
+          />
+        </div>
+      </div>
+      <ol className="grid grid-cols-1 divide-y divide-line sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+        {steps.map((s, i) => (
+          <li key={s.title}>
+            <Link to={href} className="group flex h-full gap-3 p-4 transition-colors hover:bg-raised/60">
+              <span
+                className={cn(
+                  'grid size-6 shrink-0 place-items-center rounded-full border text-xs font-medium transition-colors',
+                  s.done
+                    ? 'border-safe bg-safe text-surface'
+                    : 'border-line-strong text-muted group-hover:border-accent group-hover:text-accent',
+                )}
+              >
+                {s.done ? <Check className="size-3.5" strokeWidth={3} /> : i + 1}
+              </span>
+              <span>
+                <span className={cn('block text-sm font-medium', s.done && 'text-muted line-through')}>
+                  {s.title}
+                </span>
+                <span className="mt-0.5 block text-xs text-muted">{s.body}</span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+/** @param {{ d: OverviewDTO; href: string }} props */
+function Dashboard({ d, href }) {
   const reviewPct = d.reviewCompletion.total
     ? Math.round((d.reviewCompletion.reviewed / d.reviewCompletion.total) * 100)
     : null;
   return (
     <div className="space-y-6">
+      <GettingStarted d={d} href={href} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat value={d.counts.projects} label="projects" />
         <Stat value={d.counts.analyses} label="analyses run" />
@@ -254,7 +347,7 @@ function Dashboard({ d }) {
                     </span>
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-raised">
                       <div
-                        className={cn('h-full', GATE_BG[g])}
+                        className={cn('grow-right h-full rounded-full', GATE_BG[g])}
                         style={{ width: `${(d.gateTotals[g] / total) * 100}%` }}
                       />
                     </div>
