@@ -26,7 +26,7 @@ Last updated: 2026-10-24. This file lists what is implemented and verified, what
 
 ### Frontend (`apps/web`)
 
-- Landing page with a live radar scope hero drawn from the engine running in the browser, demo, docs with rule catalog, sign in, registration, 403/404/error screens.
+- Landing page with a live 3D radar (three.js) drawn from the engine running in the browser, demo, docs with rule catalog, sign in, registration, 403/404/error screens.
 - App shell with workspace switcher, breadcrumbs, command palette (Ctrl/⌘ K for pages, projects, recent analyses, workspaces and actions), notifications, theme toggle; overview analytics, projects, versions (upload, paste, manual builder), compare (format compatibility, polarity, cross-format opt-in, rename mapping), analysis (findings explorer, compare view with source highlights, impact graph and table, coverage and diagnostics, reviews, Radar Replay metadata, exports), consumers, policies, CI access (create, copy once, revoke), activity and audit, notifications, settings and members.
 - Light and dark themes, keyboard focus, reduced motion, accessible confirmation dialogs, mobile layouts without horizontal scroll, WCAG 2.1 AA (axe) on public pages.
 

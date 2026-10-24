@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { FileCode2, GitCompareArrows, Scale, ShieldCheck, Users } from 'lucide-react';
 import { LIMITATIONS } from '@jky/radar-core';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/primitives';
 import { GateBadge, SupportBadge } from '@/components/radar/badges';
 import { useCapabilities, useDemoAnalyses } from '@/lib/queries';
 import { Playground } from '@/features/landing/playground';
-import { RadarScope, RINGS } from '@/features/landing/radar-scope';
 import { FindingDetail } from '@/features/analysis/finding-detail';
+
+// three.js loads in its own chunk so the page text appears before the 3D scene.
+const Radar3D = lazy(() => import('@/features/landing/radar-3d'));
 
 /** @import { AnalysisResult, GateDecision } from '@jky/radar-core' */
 
@@ -45,12 +48,12 @@ const GATES = [
   ],
 ];
 
-/** Gate colours inside the always-dark scope band. @type {Record<GateDecision, [string, string]>} */
-const SCOPE_GATE = {
-  pass: ['Pass', 'var(--scope-safe)'],
-  warn: ['Warn', 'var(--scope-potential)'],
-  block: ['Block', 'var(--scope-breaking)'],
-  inconclusive: ['Inconclusive', 'var(--scope-review)'],
+/** @type {Record<GateDecision, [string, string]>} */
+const GATE_TEXT = {
+  pass: ['Pass', 'text-safe'],
+  warn: ['Warn', 'text-potential'],
+  block: ['Block', 'text-breaking'],
+  inconclusive: ['Inconclusive', 'text-inconclusive'],
 };
 
 /** Real output of `npm run radar -- compare` on the ecommerce fixtures, trimmed. */
@@ -69,13 +72,13 @@ const CLI_LINES = /** @type {Array<[string, string]>} */ ([
   ['brk', '1'],
 ]);
 const CLI_TONE = {
-  cmd: 'text-[color:var(--scope-text)]',
-  head: 'text-[color:var(--scope-phosphor)]',
-  soft: 'text-[color:var(--scope-muted)]',
+  cmd: 'text-fg',
+  head: 'text-accent',
+  soft: 'text-muted',
   blank: '',
-  brk: 'text-[color:var(--scope-breaking)]',
-  pot: 'text-[color:var(--scope-potential)]',
-  ok: 'text-[color:var(--scope-safe)]',
+  brk: 'text-breaking',
+  pot: 'text-potential',
+  ok: 'text-safe',
 };
 
 export default function Landing() {
@@ -87,90 +90,88 @@ export default function Landing() {
     document.title = 'JKY-Radar · Know what breaks before you ship';
   }, []);
   const example = result?.findings.find((f) => f.severity === 'breaking') ?? result?.findings[0];
-  const scopeFindings = useMemo(
+  const radarFindings = useMemo(
     () =>
       result ? result.findings.filter((f) => f.severity !== 'informational') : result === null ? [] : null,
     [result],
   );
-  const gate = result ? SCOPE_GATE[result.gate.decision] : null;
+  const gate = result ? GATE_TEXT[result.gate.decision] : null;
 
   return (
     <div>
-      {/* ------------------------------------------------------------- hero: the scope */}
-      <section className="scope-band relative overflow-hidden">
-        <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-12 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:gap-x-10 lg:gap-y-0 lg:pt-20 lg:pb-24">
-          <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
-            <h1 className="display-hero text-[clamp(3.4rem,10vw,7.4rem)] text-[color:var(--scope-text)]">
-              Know what breaks before you ship.
+      {/* ------------------------------------------------------------- hero */}
+      <section className="relative overflow-hidden border-b border-line">
+        <div
+          className="hairline-grid pointer-events-none absolute inset-0 opacity-[0.35] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
+          aria-hidden
+        />
+        <div
+          className="radar-glow pointer-events-none absolute top-1/2 right-[-8rem] hidden size-[52rem] -translate-y-1/2 lg:block"
+          aria-hidden
+        />
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-12 lg:pt-20 lg:pb-24">
+          <div>
+            <h1 className="hero-title text-[42px] font-semibold sm:text-[54px] xl:text-[62px]">
+              Know what breaks
+              <br />
+              before you ship.
             </h1>
-            <p className="mt-7 max-w-[36rem] text-[17px] leading-relaxed text-[color:var(--scope-text-soft)]">
+            <p className="mt-6 max-w-[34rem] text-[17px] leading-relaxed text-fg-soft">
               JKY-Radar compares two versions of an API contract and tells you which changes will break the
               clients already calling it, why, and which of your teams depend on them.
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                to="/register"
-                className="scope-btn-primary inline-flex h-12 items-center rounded-lg px-6 text-[15px] font-semibold transition-colors"
-              >
-                Create a free workspace
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/register">
+                <Button variant="primary" size="lg">
+                  Create a free workspace
+                </Button>
               </Link>
-              <Link
-                to="/demo"
-                className="scope-btn-secondary inline-flex h-12 items-center rounded-lg px-6 text-[15px] font-medium transition-colors"
-              >
-                Open the demo analyses
+              <Link to="/demo">
+                <Button variant="secondary" size="lg">
+                  Open the demo analyses
+                </Button>
               </Link>
             </div>
-          </div>
 
-          <div className="mx-auto w-full max-w-[34rem] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-center">
-            <RadarScope findings={scopeFindings} />
-            <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-[color:var(--scope-text-soft)]">
-              {RINGS.map((r) => (
-                <li key={r.severity} className="flex items-center gap-1.5">
-                  <span className="size-2 rounded-full" style={{ background: r.color }} aria-hidden />
-                  {r.short}
-                  <span className="tabular font-mono text-[color:var(--scope-muted)]">
-                    {scopeFindings?.filter((f) => f.severity === r.severity).length ?? 0}
-                  </span>
-                </li>
-              ))}
-              <li className="text-[color:var(--scope-muted)] sm:ml-auto">Closer to centre breaks more</li>
-            </ul>
-          </div>
-
-          {/* live readout of the engine run that the scope is drawing */}
-          <div className="lg:col-start-1 lg:row-start-2">
-            <dl className="grid lg:mt-12 max-w-[36rem] grid-cols-2 gap-x-6 gap-y-4 border-t border-[color:var(--scope-grid)] pt-5 sm:grid-cols-4">
+            {/* live readout of the engine run the radar is drawing */}
+            <dl className="mt-10 grid max-w-[34rem] grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-5 sm:grid-cols-4">
               <div>
-                <dt className="text-xs text-[color:var(--scope-muted)]">Release gate</dt>
-                <dd className="mt-1 font-mono text-lg font-medium" style={{ color: gate?.[1] }}>
-                  {gate?.[0] ?? '…'}
-                </dd>
+                <dt className="text-xs text-muted">Release gate</dt>
+                <dd className={`mt-1 text-lg font-semibold ${gate?.[1] ?? ''}`}>{gate?.[0] ?? '…'}</dd>
               </div>
               <div>
-                <dt className="text-xs text-[color:var(--scope-muted)]">Contacts</dt>
-                <dd className="tabular mt-1 font-mono text-lg">{scopeFindings?.length ?? '…'}</dd>
+                <dt className="text-xs text-muted">Findings</dt>
+                <dd className="tabular mt-1 text-lg font-semibold">{radarFindings?.length ?? '…'}</dd>
               </div>
               <div>
-                <dt className="text-xs text-[color:var(--scope-muted)]">Analysed in</dt>
-                <dd className="tabular mt-1 font-mono text-lg">{result ? `${ms} ms` : '…'}</dd>
+                <dt className="text-xs text-muted">Analysed in</dt>
+                <dd className="tabular mt-1 text-lg font-semibold">{result ? `${ms} ms` : '…'}</dd>
               </div>
               <div>
-                <dt className="text-xs text-[color:var(--scope-muted)]">Coverage</dt>
-                <dd className="mt-1 font-mono text-lg">{result?.coverage.level ?? '…'}</dd>
+                <dt className="text-xs text-muted">Coverage</dt>
+                <dd className="mt-1 text-lg font-semibold capitalize">{result?.coverage.level ?? '…'}</dd>
               </div>
             </dl>
-            <p className="mt-5 max-w-[36rem] text-sm text-[color:var(--scope-muted)]">
-              Live: the real engine is running in your browser on the Orders API release in the{' '}
-              <a
-                href="#console"
-                className="text-[color:var(--scope-phosphor)] underline-offset-4 hover:underline"
-              >
+            <p className="mt-5 max-w-[34rem] text-sm text-muted">
+              Live: the real engine runs in your browser on the Orders API release in the{' '}
+              <a href="#console" className="font-medium text-accent underline-offset-4 hover:underline">
                 console below
               </a>
-              . Edit the contract there and the scope redraws. Nothing leaves this page.
+              . Edit the contract there and the radar redraws. Nothing leaves this page.
             </p>
+          </div>
+
+          <div className="mx-auto w-full max-w-[40rem] min-w-0">
+            <Suspense
+              fallback={
+                <div>
+                  <Skeleton className="aspect-[1.32] w-full rounded-full opacity-40" />
+                  <Skeleton className="mt-3 h-[78px]" />
+                </div>
+              }
+            >
+              <Radar3D findings={radarFindings} />
+            </Suspense>
           </div>
         </div>
       </section>
@@ -180,7 +181,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="display text-[clamp(2rem,4vw,3rem)] leading-[1.02] font-semibold">
+              <h2 className="display text-[30px] leading-tight font-semibold sm:text-[34px]">
                 Change the contract. Watch the verdict move.
               </h2>
               <p className="mt-3 max-w-2xl text-fg-soft">
@@ -204,7 +205,7 @@ export default function Landing() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,6fr)]">
           <div>
-            <h2 className="display text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+            <h2 className="display text-[28px] leading-tight font-semibold sm:text-[32px]">
               A diff tells you what moved. Radar tells you what it breaks.
             </h2>
             <p className="mt-4 text-fg-soft">
@@ -247,7 +248,7 @@ export default function Landing() {
       {/* ------------------------------------------------------------- pipeline: a real sequence */}
       <section className="border-b border-line bg-sunken/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <h2 className="display max-w-2xl text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+          <h2 className="display max-w-2xl text-[28px] leading-tight font-semibold sm:text-[32px]">
             How a verdict is reached
           </h2>
           <p className="mt-3 max-w-2xl text-fg-soft">
@@ -278,7 +279,7 @@ export default function Landing() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2">
           <div>
-            <h2 className="display text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+            <h2 className="display text-[28px] leading-tight font-semibold sm:text-[32px]">
               A release gate that admits what it does not know
             </h2>
             <p className="mt-3 text-fg-soft">
@@ -297,7 +298,7 @@ export default function Landing() {
             </dl>
           </div>
           <div>
-            <h2 className="display text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+            <h2 className="display text-[28px] leading-tight font-semibold sm:text-[32px]">
               Know who you are about to break
             </h2>
             <p className="mt-3 text-fg-soft">
@@ -342,7 +343,7 @@ export default function Landing() {
       <section className="border-b border-line">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)]">
           <div>
-            <h2 className="display text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+            <h2 className="display text-[28px] leading-tight font-semibold sm:text-[32px]">
               Stop the merge, not the release train
             </h2>
             <p className="mt-4 text-fg-soft">
@@ -366,14 +367,12 @@ export default function Landing() {
               Set up the GitHub Actions check
             </Link>
           </div>
-          <div className="scope-band overflow-hidden rounded-xl border border-[color:var(--scope-grid)]">
-            <div className="flex items-center gap-2 border-b border-[color:var(--scope-grid)] px-4 py-2.5">
-              <span className="size-2.5 rounded-full bg-[color:var(--scope-grid)]" />
-              <span className="size-2.5 rounded-full bg-[color:var(--scope-grid)]" />
-              <span className="size-2.5 rounded-full bg-[color:var(--scope-grid)]" />
-              <span className="ml-2 font-mono text-xs text-[color:var(--scope-muted)]">
-                pull-request check
-              </span>
+          <div className="overflow-hidden rounded-[var(--radius-panel)] border border-line bg-code shadow-[var(--shadow)]">
+            <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
+              <span className="size-2.5 rounded-full bg-line-strong" />
+              <span className="size-2.5 rounded-full bg-line-strong" />
+              <span className="size-2.5 rounded-full bg-line-strong" />
+              <span className="ml-2 font-mono text-xs text-muted">pull-request check</span>
             </div>
             <pre
               className="scroll-thin overflow-x-auto p-5 font-mono text-[12.5px] leading-[1.75]"
@@ -395,7 +394,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="display text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+              <h2 className="display text-[28px] leading-tight font-semibold sm:text-[32px]">
                 Support, stated honestly
               </h2>
               <p className="mt-3 max-w-2xl text-fg-soft">
@@ -451,7 +450,7 @@ export default function Landing() {
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,6fr)]">
           <div>
             <ShieldCheck className="size-6 text-accent" />
-            <h2 className="display mt-4 text-[clamp(2rem,4vw,2.75rem)] leading-[1.04] font-semibold">
+            <h2 className="display mt-4 text-[28px] leading-tight font-semibold sm:text-[32px]">
               What JKY-Radar will not claim
             </h2>
             <p className="mt-3 text-fg-soft">
@@ -472,38 +471,36 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- CTA: the scope again, at rest */}
-      <section className="scope-band relative overflow-hidden">
+      {/* ------------------------------------------------------------- CTA */}
+      <section className="relative overflow-hidden">
         <svg
           viewBox="-100 -100 200 200"
-          className="pointer-events-none absolute top-1/2 right-[-12rem] hidden w-[38rem] -translate-y-1/2 md:block"
+          className="pointer-events-none absolute top-1/2 right-[-10rem] hidden w-[34rem] -translate-y-1/2 text-line md:block"
           aria-hidden
         >
           {[30, 50, 70, 88].map((r) => (
-            <circle key={r} r={r} fill="none" stroke="var(--scope-grid)" strokeWidth="0.5" />
+            <circle key={r} r={r} fill="none" stroke="currentColor" strokeWidth="0.5" />
           ))}
-          <line x1="-94" y1="0" x2="94" y2="0" stroke="var(--scope-grid)" strokeWidth="0.4" />
-          <line x1="0" y1="-94" x2="0" y2="94" stroke="var(--scope-grid)" strokeWidth="0.4" />
+          <line x1="-94" y1="0" x2="94" y2="0" stroke="currentColor" strokeWidth="0.4" />
+          <line x1="0" y1="-94" x2="0" y2="94" stroke="currentColor" strokeWidth="0.4" />
         </svg>
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6">
-          <h2 className="display-hero max-w-3xl text-[clamp(2.6rem,6vw,4.6rem)]">
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6">
+          <h2 className="display max-w-2xl text-[30px] leading-tight font-semibold sm:text-[36px]">
             Run your first comparison in two minutes.
           </h2>
-          <p className="mt-5 max-w-xl text-[color:var(--scope-text-soft)]">
+          <p className="mt-3 max-w-xl text-fg-soft">
             Create a workspace, upload two versions, and read the verdict.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Link
-              to="/register"
-              className="scope-btn-primary inline-flex h-12 items-center rounded-lg px-6 text-[15px] font-semibold transition-colors"
-            >
-              Create a free workspace
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/register">
+              <Button variant="primary" size="lg">
+                Create a free workspace
+              </Button>
             </Link>
-            <Link
-              to="/docs"
-              className="scope-btn-secondary inline-flex h-12 items-center rounded-lg px-6 text-[15px] font-medium transition-colors"
-            >
-              Read the docs
+            <Link to="/docs">
+              <Button variant="secondary" size="lg">
+                Read the docs
+              </Button>
             </Link>
           </div>
         </div>
