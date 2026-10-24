@@ -51,16 +51,20 @@ function filter(items, query) {
   const q = query.trim().toLowerCase();
   if (!q) return items;
   const words = q.split(/\s+/);
-  return items
-    .map((c) => {
-      const hay = `${c.label} ${c.hint ?? ''} ${c.keywords ?? ''}`.toLowerCase();
-      if (!words.every((w) => hay.includes(w))) return null;
-      const label = c.label.toLowerCase();
-      return { c, score: label.startsWith(q) ? 0 : label.includes(q) ? 1 : 2 };
-    })
-    .filter((x) => x !== null)
-    .sort((a, b) => a.score - b.score)
-    .map((x) => x.c);
+  const groupOrder = [...new Set(items.map((c) => c.group))];
+  return (
+    items
+      .map((c) => {
+        const hay = `${c.label} ${c.hint ?? ''} ${c.keywords ?? ''}`.toLowerCase();
+        if (!words.every((w) => hay.includes(w))) return null;
+        const label = c.label.toLowerCase();
+        return { c, score: label.startsWith(q) ? 0 : label.includes(q) ? 1 : 2 };
+      })
+      .filter((x) => x !== null)
+      // Keep groups together (in their original order) and rank matches within each group.
+      .sort((a, b) => groupOrder.indexOf(a.c.group) - groupOrder.indexOf(b.c.group) || a.score - b.score)
+      .map((x) => x.c)
+  );
 }
 
 /** @param {{ onClose: () => void }} props */

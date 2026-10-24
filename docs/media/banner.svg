@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-label="JKY-Radar: One Radar. Every API. Know what breaks before you ship.">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1020"/>
+      <stop offset="0.55" stop-color="#151a3a"/>
+      <stop offset="1" stop-color="#1e1446"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8aa0ff"/>
+      <stop offset="0.5" stop-color="#c4a8ff"/>
+      <stop offset="1" stop-color="#5fe0c0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#4560e8" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#4560e8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6f8bff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#6f8bff" stop-opacity="0.55"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#ffffff" stroke-opacity="0.04"/>
+    </pattern>
+    <clipPath id="scope"><circle cx="930" cy="170" r="132"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="340" rx="22" fill="url(#bg)"/>
+  <rect width="1200" height="340" rx="22" fill="url(#grid)"/>
+  <circle cx="930" cy="170" r="210" fill="url(#glow)"/>
+
+  <!-- scope -->
+  <g fill="none" stroke="#8aa0ff" stroke-opacity="0.28">
+    <circle cx="930" cy="170" r="33"/>
+    <circle cx="930" cy="170" r="66"/>
+    <circle cx="930" cy="170" r="99"/>
+    <circle cx="930" cy="170" r="132" stroke-opacity="0.45"/>
+    <path d="M798 170H1062M930 38V302" stroke-opacity="0.16"/>
+  </g>
+  <g clip-path="url(#scope)">
+    <g>
+      <path d="M930 170 L1062 170 A132 132 0 0 0 1023.3 76.7 Z" fill="url(#sweep)"/>
+      <line x1="930" y1="170" x2="1062" y2="170" stroke="#9fb2ff" stroke-width="2"/>
+      <animateTransform attributeName="transform" type="rotate" from="0 930 170" to="360 930 170" dur="4s" repeatCount="indefinite"/>
+    </g>
+  </g>
+
+  <!-- contacts: colour = severity -->
+  <g>
+    <circle cx="966" cy="139" r="6" fill="#ff5c61">
+      <animate attributeName="r" values="6;9;6" dur="4s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="966" cy="139" r="6" fill="none" stroke="#ff5c61" stroke-width="2">
+      <animate attributeName="r" values="6;22" dur="4s" begin="0.4s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" values="0.9;0" dur="4s" begin="0.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="895" cy="215" r="6" fill="#ff5c61">
+      <animate attributeName="r" values="6;9;6" dur="4s" begin="1.9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1000" cy="232" r="6" fill="#ff8a3d">
+      <animate attributeName="r" values="6;9;6" dur="4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="853" cy="110" r="5" fill="#34c795">
+      <animate attributeName="r" values="5;8;5" dur="4s" begin="3.1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="930" cy="170" r="5" fill="#9fb2ff"/>
+  </g>
+
+  <!-- text -->
+  <g font-family="'Segoe UI', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+    <text x="72" y="134" font-size="72" font-weight="700" fill="url(#title)" letter-spacing="-2">JKY-Radar</text>
+    <text x="74" y="184" font-size="26" font-weight="600" fill="#e6e9ef">One Radar. Every API.</text>
+    <text x="74" y="218" font-size="26" font-weight="600" fill="#e6e9ef">Know what breaks before you ship.</text>
+    <g font-size="15" font-weight="600">
+      <rect x="74" y="250" width="92" height="30" rx="15" fill="#ff5c61" fill-opacity="0.16" stroke="#ff5c61" stroke-opacity="0.5"/>
+      <text x="120" y="270" text-anchor="middle" fill="#ff8a8e">Block</text>
+      <rect x="176" y="250" width="86" height="30" rx="15" fill="#e8b04a" fill-opacity="0.16" stroke="#e8b04a" stroke-opacity="0.5"/>
+      <text x="219" y="270" text-anchor="middle" fill="#f2c86e">Warn</text>
+      <rect x="272" y="250" width="86" height="30" rx="15" fill="#34c795" fill-opacity="0.16" stroke="#34c795" stroke-opacity="0.5"/>
+      <text x="315" y="270" text-anchor="middle" fill="#5fe0b0">Pass</text>
+      <rect x="368" y="250" width="132" height="30" rx="15" fill="#a497ff" fill-opacity="0.16" stroke="#a497ff" stroke-opacity="0.5"/>
+      <text x="434" y="270" text-anchor="middle" fill="#bdb4ff">Inconclusive</text>
+    </g>
+  </g>
+</svg>
