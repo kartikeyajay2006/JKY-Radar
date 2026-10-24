@@ -87,7 +87,10 @@ export const Tabs = TabsPrimitive.Root;
 export function TabsList({ className, ...p }) {
   return (
     <TabsPrimitive.List
-      className={cn('flex gap-1 overflow-x-auto border-b border-line scroll-thin', className)}
+      className={cn(
+        'no-scrollbar flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line',
+        className,
+      )}
       {...p}
     />
   );

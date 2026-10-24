@@ -39,7 +39,10 @@ export default function ProjectLayout() {
           <ProtocolBadge protocol={p.protocol} />
         </div>
         {p.description && <p className="mt-1.5 max-w-2xl text-sm text-muted">{p.description}</p>}
-        <nav className="mt-5 flex gap-1 overflow-x-auto border-b border-line" aria-label="Project sections">
+        <nav
+          className="no-scrollbar mt-5 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line"
+          aria-label="Project sections"
+        >
           {tabs.map((t) => (
             <NavLink
               key={t.label}
