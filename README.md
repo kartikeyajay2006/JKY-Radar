@@ -202,10 +202,10 @@ A modular **MERN** monorepo in plain JavaScript (ES modules), with types documen
 
 ```mermaid
 flowchart TB
-    subgraph web["🖥️ apps/web · React 19 + Vite"]
+    subgraph web["🖥️ apps/web · React + Vite"]
         UI["Pages · TanStack Query · Tailwind 4 · three.js radar"]
     end
-    subgraph api["⚙️ apps/api · Express 5"]
+    subgraph api["⚙️ apps/api · Express"]
         R["Sessions · CSRF · tenancy · CI tokens"] --> Q["Analysis runner<br/>(worker threads)"]
     end
     subgraph engine["🧠 Shared engine"]
