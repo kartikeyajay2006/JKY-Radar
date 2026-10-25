@@ -175,3 +175,24 @@ describe('required properties without definitions', () => {
     expect(diff({ required: ['token'] }, { required: ['token'] }, 'request')).toEqual([]);
   });
 });
+
+describe('multipleOf compatibility', () => {
+  it.each([
+    [1e-12, 1, 'REQ_CONSTRAINT_TIGHTENED'],
+    [1.0000000001, 1, 'REQ_CONSTRAINT_TIGHTENED'],
+    [0.1, 0.3, 'REQ_CONSTRAINT_TIGHTENED'],
+    [1.0000000000000002, 1, 'REQ_CONSTRAINT_TIGHTENED'],
+    [1, 3e-16, 'REQ_CONSTRAINT_TIGHTENED'],
+    [0.6, 0.2, 'REQ_CONSTRAINT_RELAXED'],
+    [1e300, 1e-300, 'REQ_CONSTRAINT_RELAXED'],
+    [0.3, 0.1, 'REQ_CONSTRAINT_RELAXED'],
+    [1, 1e-12, 'REQ_CONSTRAINT_RELAXED'],
+  ])('classifies request multipleOf %s → %s', (before, after, rule) => {
+    expect(
+      diff({ type: 'number', multipleOf: before }, { type: 'number', multipleOf: after }, 'request'),
+    ).toEqual([rule]);
+  });
+  it('reports a response restriction being relaxed when the divisor becomes tiny', () => {
+    expect(diff({ multipleOf: 1 }, { multipleOf: 1e-12 }, 'response')).toEqual(['RES_CONSTRAINT_RELAXED']);
+  });
+});

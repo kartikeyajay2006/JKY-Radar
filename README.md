@@ -4,7 +4,7 @@
 
 <br />
 
-[![CI](https://github.com/kartikeyajay2006/JKY-Radar/actions/workflows/ci.yml/badge.svg)](https://github.com/kartikeyajay2006/JKY-Radar/actions/workflows/ci.yml) ![Tests](https://img.shields.io/badge/tests-494%20unit%20%2B%2023%20e2e-34c795?style=flat) ![Rules](https://img.shields.io/badge/rules-157%20versioned-6f8bff?style=flat) ![WCAG](https://img.shields.io/badge/a11y-WCAG%202.1%20AA-a497ff?style=flat) ![License](https://img.shields.io/badge/license-MIT-ff8a3d?style=flat)
+[![CI](https://github.com/kartikeyajay2006/JKY-Radar/actions/workflows/ci.yml/badge.svg)](https://github.com/kartikeyajay2006/JKY-Radar/actions/workflows/ci.yml) ![Tests](https://img.shields.io/badge/tests-535%20unit%20%2B%2023%20e2e-34c795?style=flat) ![Rules](https://img.shields.io/badge/rules-157%20versioned-6f8bff?style=flat) ![WCAG](https://img.shields.io/badge/a11y-WCAG%202.1%20AA-a497ff?style=flat) ![License](https://img.shields.io/badge/license-MIT-ff8a3d?style=flat)
 
 ![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=for-the-badge&logo=mongodb&logoColor=white) ![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white) ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![Node.js](https://img.shields.io/badge/Node.js-22-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white) ![Three.js](https://img.shields.io/badge/Three.js-3D-000000?style=for-the-badge&logo=threedotjs&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 
@@ -184,13 +184,15 @@ Breaking   HTTP_OPERATION_REMOVED       GET /orders/{orderId}
 Breaking   REQ_PROPERTY_REQUIRED_ADDED  POST /payments › request body › body.currency
 ```
 
-Exit code `1` means the gate failed and `2` means an input could not be parsed. See [examples/github-actions-radar-check.yml](examples/github-actions-radar-check.yml).
+Exit code `1` means the gate failed and `2` means invalid options, input, or a server/network error. Unknown options and invalid values are rejected; use `--` before filenames that begin with `--`. See [examples/github-actions-radar-check.yml](examples/github-actions-radar-check.yml).
 
 **Through your workspace.** Create a token under **Project → CI access** and the analysis lands in the web app next to its findings, impact and reviews:
 
 ```bash
 JKY_RADAR_TOKEN=jkyr_… npm run radar -- check openapi.yaml --server https://radar.example.com --label "$GIT_SHA"
 ```
+
+The CLI rejects malformed server verdicts and redirects. Upload requests time out after 90 seconds and each poll after 15 seconds.
 
 Tokens are project-scoped, shown once, stored as a hash, expire, can be revoked, and act with their creator's permissions (re-checked on every call). Without the CLI, `POST /api/v1/ci/check` does the same from any CI ([docs/API.md](docs/API.md#ci-tokens)).
 
@@ -250,7 +252,7 @@ fixtures/                synthetic contract pairs, expected results, adversarial
 | `npm run build`                               | Production build of the web app (the API runs from source)                                           |
 | `npm start`                                   | Start the API (serves the web app when `SERVE_WEB=true`)                                             |
 | `npm run typecheck` · `lint` · `format:check` | JSDoc type check, ESLint, Prettier                                                                   |
-| `npm test`                                    | 494 unit, integration and security tests (needs MongoDB)                                             |
+| `npm test`                                    | 535 unit, integration and security tests (needs MongoDB)                                             |
 | `npm run test:e2e`                            | Playwright journey, mobile and accessibility tests (`PW_CHROMIUM_PATH` can point at a system Chrome) |
 | `npm run seed:demo`                           | Idempotent public demo seed                                                                          |
 | `npm run docs:matrix`                         | Regenerate the support matrix and rule catalog from code                                             |

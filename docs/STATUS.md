@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-10-24. This file lists what is implemented and verified, what is partial, and what is not built. Claims are backed by the commands under **Evidence**.
+Last updated: 2026-10-25. This file lists what is implemented and verified, what is partial, and what is not built. Claims are backed by the commands under **Evidence**.
 
 ## Done
 
@@ -11,7 +11,8 @@ Last updated: 2026-10-24. This file lists what is implemented and verified, what
 - Adapters: OpenAPI 3.0/3.1 (supported), OpenAPI 3.2 (partial), Swagger 2.0 (supported), GraphQL SDL and introspection (supported, with graphql-js safety net), Postman v2.1 (partial, capped severities), JSON Schema draft-04 to 2020-12 with selectable polarity (supported), manual REST (supported), Protobuf/gRPC (partial), AsyncAPI 2.x/3.x (experimental), cross-format HTTP (experimental, opt-in).
 - Direction-aware schema comparison, dialect normalisation (3.0 `nullable` = 3.1 `type: null`), cycle-safe local `$ref`, conservative `allOf` merge, explicit needs-review for composition, regex, unmodelled keywords and unresolved refs.
 - Coverage (categorical), release gate with justified overrides, consumer impact, JSON/Markdown reports, deterministic fingerprints, operation alias mapping.
-- Offline CLI with gate exit codes, plus `radar check` to gate a release through the server with a CI token.
+- Offline CLI with gate exit codes, strict option validation and `--` support, plus `radar check` to gate a release through the server with a CI token. Server checks validate verdicts and polling paths, reject redirects, and bound upload and poll requests to 90 and 15 seconds.
+- Engine 1.0.2 fixes `multipleOf` compatibility for tiny divisors and near-integer ratios; the engine version in analysis hashes prevents reuse of older cached verdicts.
 
 ### Backend (`apps/api`)
 
@@ -61,7 +62,7 @@ Run locally on Node 22.22, npm 11, MongoDB 7 (Docker), Chromium 156 (Playwright 
 | `npm run typecheck`                 | JSDoc types check clean in all workspaces (`tsc --checkJs`)                                                                                                                                                                                                   |
 | `npm run lint`                      | 0 errors, 0 warnings                                                                                                                                                                                                                                          |
 | `npm run format:check`              | all files formatted                                                                                                                                                                                                                                           |
-| `npm test`                          | 14 files, **494 tests passed** (437 engine/CLI, 57 API integration, CI token and security against real MongoDB)                                                                                                                                               |
+| `npm test`                          | 14 files, **535 tests passed** (478 engine/CLI, 57 API integration, CI token and security against real MongoDB)                                                                                                                                               |
 | `npm run test:e2e`                  | **23 passed**: full journey (register → project → uploads → analysis → filter → consumer → impact → review → PDF → CI token → pipeline gate → command palette), invalid upload diagnostics, public demo, mobile layout, axe WCAG 2.1 AA on 5 pages × 2 themes |
 | `npm run build`                     | web app builds with Vite; API runs from source                                                                                                                                                                                                                |
 | `npm run docs:matrix`               | 157 rules, 15 fixture pairs, no drift                                                                                                                                                                                                                         |

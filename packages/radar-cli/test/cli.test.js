@@ -12,6 +12,47 @@ const cli = (...args) =>
   });
 
 describe('radar CLI', () => {
+  it.each([
+    ['--fail-on', 'wrn'],
+    ['--format', 'xml'],
+    ['--polarity', 'input'],
+    ['--formt', 'json'],
+    ['--format'],
+    ['--format', '--cross-format'],
+    ['--format', 'json', '--format', 'text'],
+    ['extra.yaml'],
+  ])('rejects invalid compare arguments %j', (...options) => {
+    const r = cli(
+      'compare',
+      'fixtures/openapi/safe/inventory-v1.json',
+      'fixtures/openapi/safe/inventory-v2.json',
+      ...options,
+    );
+    expect(r.status).toBe(2);
+    expect(r.stderr).toContain('Usage:');
+    expect(r.stdout).toBe('');
+  });
+  it('accepts options before files and an explicit end of options', () => {
+    const r = cli(
+      'compare',
+      '--format',
+      'json',
+      '--',
+      'fixtures/openapi/safe/inventory-v1.json',
+      'fixtures/openapi/safe/inventory-v2.json',
+    );
+    expect(r.status).toBe(0);
+    expect(JSON.parse(r.stdout).gate.decision).toBe('pass');
+  });
+  it.each([
+    ['check', 'candidate.yaml', '--server', 'http://radar.test', '--fail-on', 'wrn'],
+    ['check', 'candidate.yaml', '--server'],
+    ['check', 'candidate.yaml', 'extra.yaml', '--server', 'http://radar.test'],
+    ['capabilities', '--format', 'json'],
+    ['capabilities', 'extra.yaml'],
+  ])('rejects invalid command arguments %j', (...args) => {
+    expect(cli(...args).status).toBe(2);
+  });
   it('exits 1 and prints findings when the gate blocks', () => {
     const r = cli(
       'compare',
@@ -113,6 +154,8 @@ describe('radar check (server gate)', () => {
       });
       expect(code).toBe(1);
       expect(calls[1].url).toBe('http://radar.test/api/v1/ci/analyses/a1');
+      expect(calls[1].init.redirect).toBe('error');
+      expect(calls[1].init.signal).toBeInstanceOf(AbortSignal);
     } finally {
       vi.useRealTimers();
     }
@@ -137,5 +180,82 @@ describe('radar check (server gate)', () => {
       ...quiet,
     });
     expect(denied).toBe(2);
+  });
+  it.each([
+    null,
+    {},
+    { state: 'completed' },
+    { ...verdict('pass'), gate: { decision: 'unknown', reasons: [] } },
+    { ...verdict('pass'), gate: { decision: 'pass', reasons: 'invalid' } },
+    { ...verdict('pass'), baseline: null },
+    { ...verdict('pass'), state: 'running' },
+  ])('rejects malformed verdicts without throwing or passing: %j', async (data) => {
+    const { runCheck } = await import('../src/check.js');
+    const error = vi.fn();
+    expect(
+      await runCheck({
+        server: 'http://radar.test',
+        token: 'jkyr_abc',
+        file,
+        fetchImpl: fakeFetch([{ status: 200, body: { data } }], []),
+        ...quiet,
+        error,
+      }),
+    ).toBe(2);
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Invalid response'));
+  });
+
+  it.each(['https://other.test/steal', '//other.test/steal', '/api/v1/ci/analyses/../tokens', undefined])(
+    'rejects unsafe polling paths %j before sending another request',
+    async (poll) => {
+      const { runCheck } = await import('../src/check.js');
+      const calls = [];
+      expect(
+        await runCheck({
+          server: 'http://radar.test',
+          token: 'jkyr_abc',
+          file,
+          fetchImpl: fakeFetch(
+            [{ status: 202, body: { data: { ...verdict('warn', 'running'), poll } } }],
+            calls,
+          ),
+          ...quiet,
+        }),
+      ).toBe(2);
+      expect(calls).toHaveLength(1);
+    },
+  );
+
+  it.each([
+    'not a url',
+    'file:///tmp/radar',
+    'https://user:password@radar.test',
+    'https://radar.test?x=1',
+    'https://radar.test#fragment',
+  ])('rejects invalid server URL %s before making requests', async (server) => {
+    const { runCheck } = await import('../src/check.js');
+    const fetchImpl = vi.fn();
+    expect(await runCheck({ server, token: 'jkyr_abc', file, fetchImpl, ...quiet })).toBe(2);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('bounds a stalled request and rejects redirects carrying credentials', async () => {
+    const { runCheck } = await import('../src/check.js');
+    const controller = new AbortController();
+    const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(controller.signal);
+    try {
+      const fetchImpl = vi.fn((_url, init) => {
+        expect(init.redirect).toBe('error');
+        return new Promise((_, reject) => {
+          init.signal.addEventListener('abort', () => reject(init.signal.reason), { once: true });
+        });
+      });
+      const result = runCheck({ server: 'http://radar.test', token: 'jkyr_abc', file, fetchImpl, ...quiet });
+      expect(timeout).toHaveBeenCalledWith(90_000);
+      controller.abort(new DOMException('Request timed out', 'TimeoutError'));
+      expect(await result).toBe(2);
+    } finally {
+      timeout.mockRestore();
+    }
   });
 });

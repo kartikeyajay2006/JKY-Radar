@@ -42,7 +42,26 @@ export async function runCheck(o) {
     error(`Cannot read input: ${/** @type {Error} */ (e).message}`);
     return 2;
   }
-  const base = o.server.replace(/\/$/, '');
+  let base;
+  try {
+    const server = new URL(o.server);
+    if (
+      !['http:', 'https:'].includes(server.protocol) ||
+      server.username ||
+      server.password ||
+      server.search ||
+      server.hash
+    )
+      throw new Error('Use an HTTP(S) server URL without credentials, a query or a fragment.');
+    base = server.href.replace(/\/$/, '');
+  } catch {
+    error('Invalid server URL. Use an HTTP(S) URL without credentials, a query or a fragment.');
+    return 2;
+  }
+  if (o.failOn !== undefined && !['block', 'warn'].includes(o.failOn)) {
+    error('Invalid failOn: expected "block" or "warn".');
+    return 2;
+  }
   const headers = { Authorization: `Bearer ${o.token}`, 'Content-Type': 'application/json' };
   const label = (o.label ?? basename(o.file)).slice(0, 60);
 
@@ -56,7 +75,26 @@ export async function runCheck(o) {
         error(`  candidate${d.source?.line ? `:${d.source.line}` : ''} ${d.code} ${d.message}`);
       return null;
     }
-    return { status: res.status, data: body?.data };
+    const data = body?.data;
+    const pending = res.status === 202;
+    if (
+      !data ||
+      typeof data.url !== 'string' ||
+      (pending
+        ? !['queued', 'running'].includes(data.state) ||
+          typeof data.poll !== 'string' ||
+          !/^\/api\/v1\/ci\/analyses\/[A-Za-z0-9_-]+$/.test(data.poll)
+        : !['completed', 'failed'].includes(data.state)) ||
+      (data.state === 'completed' &&
+        (!['pass', 'warn', 'block', 'inconclusive'].includes(data.gate?.decision) ||
+          !Array.isArray(data.gate.reasons) ||
+          typeof data.baseline?.label !== 'string' ||
+          typeof data.candidate?.label !== 'string'))
+    ) {
+      error('✖ Invalid response from the server; no valid release verdict was received.');
+      return null;
+    }
+    return { status: res.status, data };
   };
 
   /** @type {{ status: number; data: any } | null} */
@@ -65,6 +103,8 @@ export async function runCheck(o) {
     out = await read(
       await doFetch(`${base}/api/v1/ci/check`, {
         method: 'POST',
+        redirect: 'error',
+        signal: AbortSignal.timeout(90_000),
         headers,
         body: JSON.stringify({
           candidate: { label, content, fileName: basename(o.file) },
@@ -76,7 +116,13 @@ export async function runCheck(o) {
     // The server answers 202 when the analysis is still running; poll until it settles.
     for (let i = 0; out && out.status === 202 && i < 60; i++) {
       await sleep(2000);
-      out = await read(await doFetch(`${base}${out.data.poll}`, { headers }));
+      out = await read(
+        await doFetch(`${base}${out.data.poll}`, {
+          headers,
+          redirect: 'error',
+          signal: AbortSignal.timeout(15_000),
+        }),
+      );
     }
   } catch (e) {
     error(`✖ Cannot reach ${base}: ${/** @type {Error} */ (e).message}`);

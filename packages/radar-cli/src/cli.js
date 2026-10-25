@@ -15,15 +15,9 @@ import { runCheck } from './check.js';
 
 /** @import { Protocol } from '@jky/radar-core' */
 
-const args = process.argv.slice(2);
-/** @param {string} name */
-const flag = (name) => {
-  const i = args.indexOf(`--${name}`);
-  return i >= 0 ? args[i + 1] : undefined;
-};
-/** @param {string} name */
-const has = (name) => args.includes(`--${name}`);
-const usage = () => {
+const [command, ...args] = process.argv.slice(2);
+const usage = (message = '') => {
+  if (message) console.error(message);
   console.error(
     'Usage: radar compare <baseline> <candidate> [--format text|json|md] [--protocol <p>] [--polarity request|response] [--cross-format] [--fail-on block|warn]',
   );
@@ -34,8 +28,49 @@ const usage = () => {
   process.exit(2);
 };
 
-const [command, ...rest] = args;
+if (!['compare', 'check', 'capabilities'].includes(command)) usage();
+const allowed = {
+  compare: ['format', 'protocol', 'polarity', 'cross-format', 'fail-on'],
+  check: ['server', 'label', 'baseline', 'fail-on'],
+  capabilities: [],
+}[command];
+const flags = new Map();
+/** @type {string[]} */
+const positional = [];
+let optionsEnded = false;
+for (let i = 0; i < args.length; i++) {
+  const arg = args[i];
+  if (!optionsEnded && arg === '--') {
+    optionsEnded = true;
+  } else if (!optionsEnded && arg.startsWith('--')) {
+    const name = arg.slice(2);
+    if (!allowed.includes(name)) usage(`Unknown option: ${arg}`);
+    if (flags.has(name)) usage(`Duplicate option: ${arg}`);
+    if (name === 'cross-format') flags.set(name, 'true');
+    else {
+      const value = args[++i];
+      if (!value || value.startsWith('--')) usage(`Missing value for ${arg}`);
+      flags.set(name, value);
+    }
+  } else {
+    positional.push(arg);
+  }
+}
+/** @param {string} name */
+const flag = (name) => flags.get(name);
+/** @param {string} name */
+const has = (name) => flags.has(name);
+for (const [name, values] of Object.entries({
+  format: ['text', 'json', 'md'],
+  polarity: ['request', 'response'],
+  'fail-on': ['block', 'warn'],
+})) {
+  if (has(name) && !values.includes(flag(name)))
+    usage(`Invalid --${name}: ${flag(name)}. Expected ${values.join(' or ')}.`);
+}
+
 if (command === 'capabilities') {
+  if (positional.length) usage('capabilities takes no input files.');
   for (const c of capabilityReport())
     console.log(
       `${c.status.padEnd(13)} ${c.label} (${c.versions}) — rules ${c.rules.tested}/${c.rules.registered}`,
@@ -43,29 +78,22 @@ if (command === 'capabilities') {
   process.exit(0);
 }
 if (command === 'check') {
-  const file = rest.find((a, i) => !a.startsWith('--') && !(i > 0 && rest[i - 1].startsWith('--')));
+  const [file] = positional;
   const server = flag('server') ?? process.env.JKY_RADAR_URL;
-  if (!file || !server) usage();
-  const fail = flag('fail-on');
+  if (positional.length !== 1 || !server) usage();
   process.exit(
     await runCheck({
-      server: /** @type {string} */ (server),
+      server,
       token: process.env.JKY_RADAR_TOKEN ?? '',
-      file: /** @type {string} */ (file),
+      file,
       ...(flag('label') ? { label: flag('label') } : {}),
       ...(flag('baseline') ? { baseline: flag('baseline') } : {}),
-      ...(fail === 'warn' || fail === 'block' ? { failOn: fail } : {}),
+      ...(flag('fail-on') ? { failOn: flag('fail-on') } : {}),
     }),
   );
 }
-if (command !== 'compare') usage();
-const positional = rest.filter(
-  (a, i) =>
-    !a.startsWith('--') &&
-    !(i > 0 && rest[i - 1].startsWith('--') && !['--cross-format'].includes(rest[i - 1])),
-);
 const [basePath, candPath] = positional;
-if (!basePath || !candPath) usage();
+if (positional.length !== 2) usage();
 
 const protocol = /** @type {Protocol | undefined} */ (flag('protocol'));
 if (protocol && !PROTOCOLS.includes(protocol)) {

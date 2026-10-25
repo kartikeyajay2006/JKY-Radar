@@ -792,9 +792,20 @@ function parseMaybe(s) {
  * @returns {boolean}
  */
 function isMultiple(a, b) {
-  // relaxed when old multipleOf is a multiple of the new one (every old-valid value stays valid)
-  const r = a / b;
-  return Math.abs(r - Math.round(r)) < 1e-9;
+  if (!Number.isFinite(a) || !Number.isFinite(b) || a <= 0 || b <= 0) return false;
+  // Compare the decimal values exactly: floating-point division can turn a tiny
+  // ratio into zero or round a large non-integer ratio to an integer.
+  const decimal = (/** @type {number} */ value) => {
+    const [mantissa, exponent = '0'] = String(value).split('e');
+    const fractionLength = mantissa.split('.')[1]?.length ?? 0;
+    return { coefficient: BigInt(mantissa.replace('.', '')), exponent: Number(exponent) - fractionLength };
+  };
+  const old = decimal(a);
+  const next = decimal(b);
+  const shift = old.exponent - next.exponent;
+  const numerator = old.coefficient * 10n ** BigInt(Math.max(shift, 0));
+  const denominator = next.coefficient * 10n ** BigInt(Math.max(-shift, 0));
+  return numerator % denominator === 0n;
 }
 
 /** @typedef {{ value: number; exclusive: boolean } | undefined} Bound */
