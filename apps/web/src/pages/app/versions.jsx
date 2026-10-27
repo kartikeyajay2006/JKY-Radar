@@ -155,6 +155,59 @@ function UploadPanel() {
             </div>
           </TabsContent>
           <TabsContent value="paste">
+            <p className="mb-3 text-sm text-muted">
+              Paste an API contract, such as OpenAPI or JSON Schema. A sample response like{' '}
+              <code>{'{"name":"Alex","email":"a@b.com"}'}</code> describes data, but does not declare field
+              types or requirements.
+              {PROTOCOL_FAMILY[project.protocol] === 'http' &&
+                ' Use Build manually to describe your REST endpoint and its fields.'}
+            </p>
+            <details className="mb-3 text-sm text-muted">
+              <summary className="cursor-pointer">Show a contract example</summary>
+              <p className="my-2">
+                {PROTOCOL_FAMILY[project.protocol] === 'http'
+                  ? 'This OpenAPI contract describes a response with name and email fields.'
+                  : 'This JSON Schema describes the fields in the sample data. Use it in a JSON Schema project; other project types require their own contract format.'}
+              </p>
+              <pre className="overflow-x-auto rounded-md border border-line p-3 text-xs select-text">
+                {JSON.stringify(
+                  PROTOCOL_FAMILY[project.protocol] === 'http'
+                    ? {
+                        openapi: '3.0.3',
+                        info: { title: 'Users API', version: '1.0.0' },
+                        paths: {
+                          '/users': {
+                            get: {
+                              responses: {
+                                200: {
+                                  description: 'User',
+                                  content: {
+                                    'application/json': {
+                                      schema: {
+                                        type: 'object',
+                                        properties: {
+                                          name: { type: 'string' },
+                                          email: { type: 'string' },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      }
+                    : {
+                        $schema: 'https://json-schema.org/draft/2020-12/schema',
+                        type: 'object',
+                        properties: { name: { type: 'string' }, email: { type: 'string' } },
+                      },
+                  null,
+                  2,
+                )}
+              </pre>
+            </details>
             <div className="panel overflow-hidden">
               <Suspense fallback={<Skeleton className="h-72 rounded-none" />}>
                 <CodePane
@@ -223,8 +276,13 @@ function UploadPanel() {
       </div>
       {err && (
         <div className="mt-4 space-y-2">
-          <p className="text-sm font-medium text-breaking">{err.message}</p>
-          <Diagnostics list={diags} />
+          {diags.length ? (
+            <Diagnostics list={diags} />
+          ) : (
+            <p role="alert" className="text-sm font-medium text-breaking">
+              {err.message}
+            </p>
+          )}
         </div>
       )}
     </Section>

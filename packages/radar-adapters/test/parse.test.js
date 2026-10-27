@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectFormat, parseStructured } from '../src/index.js';
+import { detectFormat, parseContract, parseStructured } from '../src/index.js';
 import { fixture } from './helpers.js';
 
 describe('structured parser', () => {
@@ -23,6 +23,25 @@ describe('structured parser', () => {
 });
 
 describe('format detection', () => {
+  it('rejects sample payloads with actionable contract guidance', () => {
+    const result = parseContract({ content: '{"name":"Alex","email":"a@b.com"}' });
+    expect(result.ok).toBe(false);
+    if (result.ok !== false) return;
+    expect(result.diagnostics[0]).toMatchObject({ code: 'UNKNOWN_FORMAT' });
+    expect(result.diagnostics[0].message).toContain('sample data, not a contract');
+    expect(result.diagnostics[0].message).toContain('Build manually');
+  });
+  it('accepts a schema describing the sample payload', () => {
+    const result = parseContract({
+      content: JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: { name: { type: 'string' }, email: { type: 'string' } },
+      }),
+    });
+    expect(result.ok).toBe(true);
+    expect(result.detection.protocol).toBe('json-schema');
+  });
   it.each([
     ['openapi/breaking/ecommerce-v1.yaml', 'openapi'],
     ['swagger2/petstore-swagger2.yaml', 'swagger2'],

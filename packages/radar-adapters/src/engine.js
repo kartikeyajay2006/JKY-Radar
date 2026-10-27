@@ -71,7 +71,7 @@ export function parseContract(input, limits = DEFAULT_LIMITS) {
     return fail(
       detection,
       'UNKNOWN_FORMAT',
-      'Could not detect a supported contract format. Supported: OpenAPI 3.x, Swagger 2.0, GraphQL SDL/introspection, Postman v2.1, JSON Schema, JKY manual REST, Protobuf (.proto), AsyncAPI 2/3.',
+      'No supported API contract was detected. A JSON payload such as {"name":"Alex","email":"a@b.com"} is sample data, not a contract. Upload an OpenAPI/Swagger document, GraphQL schema, Postman v2.1 collection, JSON Schema (with type and properties), JKY manual REST contract, Protobuf (.proto), or AsyncAPI 2/3 document. For REST APIs, you can also use Build manually to describe an endpoint and its fields.',
     );
   }
   if (
