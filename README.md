@@ -12,6 +12,10 @@
 
 [Quick start](#-quick-start) · [See it in action](#-see-it-in-action) · [How it works](#-how-it-works) · [CLI and CI](#-gate-every-pull-request) · [Docs](docs/)
 
+### 🎥 Watch the demo
+
+[**▶ Click me to watch the JKY-Radar video**](https://drive.google.com/file/d/1Aln6c4cCJKxmPO7qVvWlHOWIQ4MQEzeI/view?usp=sharing)
+
 </div>
 
 <br />
